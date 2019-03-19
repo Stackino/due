@@ -1,0 +1,15 @@
+{
+    "private": true,
+    "scripts": {
+        "init": "yarn install --frozen-lockfile",
+        "build:dev": "yarn workspaces run build:dev",
+        "build:prod": "yarn workspaces run build:dev",
+        "test": "yarn workspaces run test"
+    },
+    "workspaces": [
+        "packages/due",
+        "packages/due-plugin-progress",
+        "packages/due-plugin-react",
+        "packages/due-plugin-router5"
+    ]
+}

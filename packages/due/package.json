@@ -1,0 +1,50 @@
+{
+  "name": "@stackino/due",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "repository": "https://github.com/Stackino/Due",
+  "author": "Lukáš Novotný",
+  "license": "Apache-2.0",
+  "typings": "./types/index.d.ts",
+  "scripts": {
+    "init": "yarn install --frozen-lockfile",
+    "build:dev": "webpack --mode development",
+    "build:prod": "webpack --mode production",
+    "test": "jest",
+    "watch:dev": "webpack --mode development --watch",
+    "watch:prod": "webpack --mode production --watch",
+    "prepublishOnly": "yarn run build:prod"
+  },
+  "dependencies": {
+    "classnames": "^2.2.6",
+    "tslib": "^1.9.3",
+    "ua-parser-js": "^0.7.19"
+  },
+  "peerDependencies": {
+    "inversify": "^5.0.0",
+    "mobx": "^5.0.0",
+    "reflect-metadata": "^0.1.0",
+    "rxjs": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.11",
+    "@types/ua-parser-js": "^0.7.32",
+    "@types/webpack": "^4.4.26",
+    "@types/webpack-env": "^1.13.9",
+    "@typescript-eslint/eslint-plugin": "^1.5.0",
+    "@typescript-eslint/parser": "^1.5.0",
+    "eslint": "^5.16.0",
+    "eslint-loader": "^2.1.2",
+    "inversify": "^5.0.1",
+    "jest": "^24.5.0",
+    "mobx": "^5.9.4",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.4.0",
+    "ts-jest": "^24.0.1",
+    "ts-loader": "^5.3.3",
+    "ts-node": "^8.0.3",
+    "typescript": "^3.4.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  }
+}

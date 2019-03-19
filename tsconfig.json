@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "sourceMap": true,
+        "strict": true,
+        "noImplicitReturns": true,
+        "noEmitOnError": false,
+        "removeComments": false,
+        "experimentalDecorators": true,
+        "downlevelIteration": true,
+        "importHelpers": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "lib": [ "dom", "es2018" ],
+        "types": [
+            "reflect-metadata",
+            "webpack-env"
+        ]
+    }
+}

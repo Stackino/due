@@ -1,8 +1,8 @@
 {
   "name": "@stackino/due-plugin-react",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/index.js",
-  "repository": "https://github.com/Stackino/Due/packages/due-plugin-react",
+  "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",
   "license": "Apache-2.0",
   "typings": "./types/index.d.ts",
@@ -20,7 +20,7 @@
     "core-decorators": "^0.20.0"
   },
   "peerDependencies": {
-    "@stackino/due": "^0.0.1",
+    "@stackino/due": "0.0.x",
     "mobx-react": "^5.0.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0"

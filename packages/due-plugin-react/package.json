@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due-plugin-react",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",
@@ -31,7 +31,7 @@
     "@types/react": "^16.8.10",
     "@types/react-dom": "^16.8.3",
     "jest": "^24.5.0",
-    "mobx": "^5.9.0",
+    "mobx": "^5.9.4",
     "mobx-react": "^5.4.3",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",

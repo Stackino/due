@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",
@@ -22,7 +22,7 @@
   },
   "peerDependencies": {
     "inversify": "^5.0.0",
-    "mobx": "4.9.0 || ^5.9.0",
+    "mobx": "^4.9.0 || ^5.9.0",
     "reflect-metadata": "^0.1.0",
     "rxjs": "^6.0.0"
   },

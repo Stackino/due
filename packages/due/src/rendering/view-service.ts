@@ -1,8 +1,7 @@
-import { combineLatest, Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
 import { inject, injectable, Tag } from '../ioc';
 import { RenderService, RenderServiceTag } from '../rendering';
 import { Portalable, Router, RouterTag, Transition } from '../routing';
+import { reaction, comparer, IReactionDisposer } from 'mobx';
 
 export const ViewServiceTag = new Tag<ViewService>('Stackino view service');
 
@@ -19,7 +18,7 @@ export class DefaultViewService implements ViewService {
 	@inject(RenderServiceTag)
 	private readonly renderService!: RenderService;
 
-	private subscription: Subscription = new Subscription();
+	private subscription: IReactionDisposer | null = null;
 
 	private activeTransition: Transition | null = null;
 	private activePortals: ReadonlyArray<Portalable<unknown, unknown>> | null = null;
@@ -32,17 +31,23 @@ export class DefaultViewService implements ViewService {
 
 		this.running = true;
 
-		this.subscription.add(
-			combineLatest(this.router.activeTransition, this.router.portals)
-				.pipe(debounceTime(0))
-				.subscribe(async ([activeTransition, portals]) => {
-					if (this.activeTransition !== activeTransition || this.activePortals !== portals) {
-						this.renderService.render(activeTransition, portals);
+		this.subscription = reaction(
+			() => {
+				const value: [Transition | null, ReadonlyArray<Portalable<unknown, unknown>>] = [this.router.activeTransition, this.router.portals];
 
-						this.activeTransition = activeTransition;
-						this.activePortals = portals;
-					}
-				})
+				return value;	
+			}, 
+			([activeTransition, portals]) => {
+				if (this.activeTransition !== activeTransition || this.activePortals !== portals) {
+					this.renderService.render(activeTransition, portals);
+
+					this.activeTransition = activeTransition;
+					this.activePortals = portals;
+				}
+			},
+			{
+				delay: 1,				
+			}
 		);
 
 		return Promise.resolve();
@@ -53,8 +58,10 @@ export class DefaultViewService implements ViewService {
 			throw new Error('Attempt to stop stopped view service');
 		}
 
-		this.subscription.unsubscribe();
-		this.subscription = new Subscription();
+		if (this.subscription) {
+			this.subscription();
+			this.subscription = null;
+		}
 
 		this.running = false;
 

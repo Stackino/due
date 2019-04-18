@@ -21,7 +21,6 @@ function configure(): webpack.Configuration {
         },
         externals: {
             'mobx': 'mobx',
-            'rxjs': 'rxjs',
             'tslib': 'tslib'
         },
     };

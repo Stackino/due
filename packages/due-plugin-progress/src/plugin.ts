@@ -1,6 +1,5 @@
-import { Container, Plugin, RouterTag } from '@stackino/due';
-import { combineLatest, Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { Container, Plugin, RouterTag, Transition } from '@stackino/due';
+import { reaction, IReactionDisposer, comparer } from 'mobx';
 
 const topbar = require('topbar');
 
@@ -9,7 +8,7 @@ export class ProgressPlugin implements Plugin {
 
 	}
 
-	private subscription: Subscription = new Subscription();
+	private subscription: IReactionDisposer | null = null;
 	private running: boolean = false;
 	private visible: boolean = false;
 
@@ -22,24 +21,29 @@ export class ProgressPlugin implements Plugin {
 
 		this.running = true;
 
-		this.subscription.add(
-			combineLatest(router.activeTransition, router.pendingTransitions)
-				.pipe(debounceTime(0))
-				.subscribe(async ([activeTransition, pendingTransitions]) => {
-					if (pendingTransitions.length <= 0 || (activeTransition && activeTransition.id === router.latestTransitionId)) {
-						if (this.visible) {
-							topbar.hide();
-							this.visible = false;
-						}
-					} else {
-						if (!this.visible) {
-							topbar.show();
-							this.visible = true;
-						}
-					}
+		this.subscription = reaction(
+			() => {
+				const value: [Transition | null, readonly Transition[]] = [router.activeTransition, router.pendingTransitions];
 
-					// console.log('progress', activeTransition, pendingTransitions);
-				})
+				return value;
+			},
+			([activeTransition, pendingTransitions]) => {
+				if (pendingTransitions.length <= 0 || (activeTransition && activeTransition.id === router.latestTransitionId)) {
+					if (this.visible) {
+						topbar.hide();
+						this.visible = false;
+					}
+				} else {
+					if (!this.visible) {
+						topbar.show();
+						this.visible = true;
+					}
+				}
+			},
+			{
+				delay: 1,
+				equals: comparer.structural,
+			}
 		);
 
 		return Promise.resolve();
@@ -50,8 +54,10 @@ export class ProgressPlugin implements Plugin {
 			throw new Error('Attempt to stop stopped progress plugin');
 		}
 
-		this.subscription.unsubscribe();
-		this.subscription = new Subscription();
+		if (this.subscription) {
+			this.subscription();
+			this.subscription = null;
+		}
 
 		this.running = false;
 

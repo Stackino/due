@@ -22,7 +22,6 @@ function configure(): webpack.Configuration {
         externals: {
             '@stackino/due': '@stackino/due',
             'mobx': 'mobx',
-            'rxjs': 'rxjs',
             'tslib': 'tslib'
         },
     };

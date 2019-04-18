@@ -24,10 +24,9 @@ function configure(): webpack.Configuration {
             'core-decorators': 'core-decorators',
             'classnames': 'classnames',
             'mobx': 'mobx',
-            'mobx-react': 'mobx-react',
+            'mobx-react-lite': 'mobx-react-lite',
             'react': 'react',
             'react-dom': 'react-dom',
-            'rxjs': 'rxjs',
             'tslib': 'tslib'
         },
     };

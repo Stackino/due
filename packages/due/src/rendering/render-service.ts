@@ -1,9 +1,11 @@
 import { Tag } from '../ioc';
-import { Portalable, Transition } from '../routing';
+import { Portalable, Transition, Routable } from '../routing';
 
 export const RenderServiceTag = new Tag<RenderService>('Stackino render service');
 
-export const RootPageComponent = Symbol('Stackino root page component');
+export class RootPage implements Routable {
+	enter = undefined;
+}
 
 export interface RenderService {
 	start(): Promise<void>;

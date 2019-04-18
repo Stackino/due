@@ -1,10 +1,9 @@
 import { BindingScope, Container, ContainerTag, DefaultContainer } from './ioc';
 import { DefaultDiagnosticsService, DiagnosticsServiceTag } from './diagnostics';
-import { RouterTag, RouteBuilder, RootRouteDeclaration, RouteRegistryTag, DefaultRouteRegistry, DefaultRouter } from './routing';
-import { RenderServiceTag, RootPageComponent, ViewServiceTag, DefaultViewService } from './rendering';
+import { RouterTag, RouteBuilder, RootRouteDeclaration, RouteRegistryTag, DefaultRouteRegistry, DefaultRouter, Routable } from './routing';
+import { RenderServiceTag, ViewServiceTag, DefaultViewService, RootPage } from './rendering';
 import { Provider, executeProvider } from './tools';
 import { Plugin } from './plugin';
-import { Page } from './page';
 
 export abstract class Application {
 	protected abstract configurePlugins(): Provider<Plugin[]>;
@@ -34,17 +33,7 @@ export abstract class Application {
 		const builder = new RouteBuilder();
 		await this.configureRoutes(builder);
 		const rootRoute: RootRouteDeclaration = new RootRouteDeclaration(
-			() => {
-				class RootPage implements Page<symbol> {
-					enter(): Promise<void> {
-						return Promise.resolve();
-					}
-
-					component = RootPageComponent;
-				}
-
-				return RootPage;
-			},
+			() => RootPage,
 			() => builder.build(rootRoute)
 		);
 

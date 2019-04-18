@@ -1,6 +1,5 @@
 import { State } from './state';
 import { Route } from './route';
-import { Subject } from 'rxjs';
 import { PromiseCompletitionSource, executeProvider } from '../tools';
 import { Container, inject, ContainerTag } from '../ioc';
 import { DiagnosticsServiceTag, DiagnosticsService } from '../diagnostics';

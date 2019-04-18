@@ -1,10 +1,10 @@
-import { Observable, BehaviorSubject } from 'rxjs';
 import { Tag, injectable, inject, ContainerTag, Container } from '../ioc';
 import { Transition, TransitionController, TransitionStatus } from './transition';
 import { Route } from './route';
 import { Portalable } from './portalable';
 import { RouteRegistryTag, RouteRegistry, RouteDeclaration, State } from '.';
 import { PromiseCompletitionSource, executeProvider } from '..';
+import { observable } from 'mobx';
 
 export const RouterHandlerFactoryTag = new Tag<RouterHandlerFactory>('Stackino router handler factory');
 export const RouterTag = new Tag<Router>('Stackino router');
@@ -30,14 +30,10 @@ export interface RouterHandlerFactory {
 	create(main: boolean): Promise<RouterHandler>;
 }
 
-export interface ObservableValue<T> extends Observable<T> {
-	getValue(): T;
-}
-
 export interface Router {
-	readonly activeTransition: ObservableValue<Transition | null>;
-	readonly pendingTransitions: ObservableValue<ReadonlyArray<Transition>>;
-	readonly portals: ObservableValue<ReadonlyArray<Portalable<unknown, unknown>>>;
+	readonly activeTransition: Transition | null;
+	readonly pendingTransitions: ReadonlyArray<Transition>;
+	readonly portals: ReadonlyArray<Portalable<unknown, unknown>>;
 	readonly latestTransitionId: string | null;
 
 	start(): Promise<void>;
@@ -129,14 +125,14 @@ export class DefaultRouter implements Router {
 		return this._latestTransitionId;
 	}
 
-	private activeTransitionSubject: BehaviorSubject<Transition | null> = new BehaviorSubject<Transition | null>(null);
-	get activeTransition(): ObservableValue<Transition | null> {
-		return this.activeTransitionSubject;
+	private activeTranstionValue = observable.box<Transition | null>(null);
+	get activeTransition(): Transition | null {
+		return this.activeTranstionValue.get();
 	}
 
-	private pendingTransitionsSubject: BehaviorSubject<Transition[]> = new BehaviorSubject<Transition[]>([]);
-	get pendingTransitions(): ObservableValue<Transition[]> {
-		return this.pendingTransitionsSubject;
+	private pendingTransitionsValue = observable.box<Transition[]>([]);
+	get pendingTransitions(): Transition[] {
+		return this.pendingTransitionsValue.get();
 	}
 
 	async start(): Promise<void> {
@@ -154,18 +150,18 @@ export class DefaultRouter implements Router {
 		const transition = new TransitionController(transitionId, from, to, toParams);
 		this.container.inject(transition);
 
-		const nextPendingTransitions = this.pendingTransitions.getValue().slice();
+		const nextPendingTransitions = this.pendingTransitions.slice();
 		nextPendingTransitions.push(transition);
-		this.pendingTransitionsSubject.next(nextPendingTransitions);
+		this.pendingTransitionsValue.set(nextPendingTransitions);
 
 		(async () => {
 			await transition.finished;
 
-			const nextPendingTransitions = this.pendingTransitions.getValue().filter(t => t !== transition);
-			this.pendingTransitionsSubject.next(nextPendingTransitions);
+			const nextPendingTransitions = this.pendingTransitions.filter(t => t !== transition);
+			this.pendingTransitionsValue.set(nextPendingTransitions);
 
 			if (transition.status === TransitionStatus.finished) {
-				this.activeTransitionSubject.next(transition);
+				this.activeTranstionValue.set(transition);
 			}
 		})();
 
@@ -195,7 +191,7 @@ export class DefaultRouter implements Router {
 			throw new Error('Attempt to use stopped router');
 		}
 
-		const transition = this.activeTransitionSubject.getValue();
+		const transition = this.activeTransition;
 		if (!transition) {
 			return false;
 		}
@@ -287,9 +283,9 @@ export class DefaultRouter implements Router {
 	// portals - todo: move
 
 	private portalLifecycles: Map<Portalable<unknown, unknown>, PortalLifecycle> = new Map();
-	private portalsSubject: BehaviorSubject<Portalable<unknown, unknown>[]> = new BehaviorSubject<Portalable<unknown, unknown>[]>([]);
-	get portals(): ObservableValue<Portalable<unknown, unknown>[]> {
-		return this.portalsSubject;
+	private portalsValue = observable.box<Portalable<unknown, unknown>[]>([]);
+	get portals(): Portalable<unknown, unknown>[] {
+		return this.portalsValue.get();
 	}
 
 	async portal<TInput, TOutput>(portalClass: new () => Portalable<TInput, TOutput>, input: TInput): Promise<TOutput> {
@@ -307,9 +303,9 @@ export class DefaultRouter implements Router {
 		this.portalLifecycles.set(lifecycle.portal, lifecycle);
 
 		const nextPortals: Portalable<unknown, unknown>[] = [];
-		nextPortals.push.apply(nextPortals, this.portalsSubject.value);
+		nextPortals.push.apply(nextPortals, this.portals);
 		nextPortals.push(lifecycle.portal);
-		this.portalsSubject.next(nextPortals);
+		this.portalsValue.set(nextPortals);
 
 		await lifecycle.enter();
 
@@ -346,12 +342,12 @@ export class DefaultRouter implements Router {
 		let result = await lifecycle.exit();
 
 		const nextPortals: Portalable<unknown, unknown>[] = [];
-		nextPortals.push.apply(nextPortals, this.portalsSubject.value);
+		nextPortals.push.apply(nextPortals, this.portals);
 		const index = nextPortals.indexOf(lifecycle.portal);
 		if (index !== -1) {
 			nextPortals.splice(index, 1);
 		}
-		this.portalsSubject.next(nextPortals);
+		this.portalsValue.set(nextPortals);
 
 		this.portalLifecycles.delete(portal);
 

@@ -13,7 +13,7 @@ type SideEffect = () => void;
 export interface Action<TSelf, TFlow extends Flow<TSelf>> {
 	(this: TSelf, ...args: Parameters<TFlow>): void;
 
-	readonly isRunning: boolean;
+	readonly running: boolean;
 }
 
 function isIterableIterator<T>(obj: T): obj is Extract<T, IterableIterator<T>> {
@@ -39,8 +39,8 @@ function isAsyncIterableIterator<T>(obj: T): obj is Extract<T, AsyncIterableIter
 }
 
 export function action<TSelf, TFlow extends Flow<TSelf>>(self: TSelf, action: TFlow): Action<TSelf, TFlow> {
-	let isRunningAtom = createAtom('User action \'isRunning\'');
-	let isRunningCounter = 0;
+	let runningAtom = createAtom('Action \'running\'');
+	let runningCounter = 0;
 	let idCounter = 0;
 
 	let run = async function (...args: unknown[]): Promise<void> {
@@ -51,8 +51,8 @@ export function action<TSelf, TFlow extends Flow<TSelf>>(self: TSelf, action: TF
 				console.info(`action ${id} starting`);
 			}
 
-			isRunningCounter++;
-			isRunningAtom.reportChanged();
+			runningCounter++;
+			runningAtom.reportChanged();
 
 			const result = await action.apply(self, args);
 
@@ -130,8 +130,8 @@ export function action<TSelf, TFlow extends Flow<TSelf>>(self: TSelf, action: TF
 				diagnosticsService.error(error);
 			}
 		} finally {
-			isRunningCounter--;
-			isRunningAtom.reportChanged();
+			runningCounter--;
+			runningAtom.reportChanged();
 
 			if (trace) {
 				console.info(`action ${id} finished`);
@@ -143,11 +143,11 @@ export function action<TSelf, TFlow extends Flow<TSelf>>(self: TSelf, action: TF
 		run(...args);
 	};
 
-	Object.defineProperty(fn, 'isRunning', {
+	Object.defineProperty(fn, 'running', {
 		get: () => {
-			isRunningAtom.reportObserved();
+			runningAtom.reportObserved();
 
-			return isRunningCounter > 0;
+			return runningCounter > 0;
 		},
 	});
 

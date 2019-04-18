@@ -3,7 +3,7 @@
     "scripts": {
         "init": "yarn install --frozen-lockfile",
         "build:dev": "yarn workspaces run build:dev",
-        "build:prod": "yarn workspaces run build:dev",
+        "build:prod": "yarn workspaces run build:prod",
         "test": "yarn workspaces run test"
     },
     "workspaces": [
@@ -11,5 +11,13 @@
         "packages/due-plugin-progress",
         "packages/due-plugin-react",
         "packages/due-plugin-router5"
-    ]
+    ],
+    "devDependencies": {
+        "inversify": "^5.0.1",
+        "mobx": "^5.9.4",
+        "mobx-react-lite": "^1.2.0",
+        "react": "^16.8.4",
+        "react-dom": "^16.8.4",
+        "reflect-metadata": "^0.1.13"
+    }
 }

@@ -10,6 +10,14 @@ Opinionated way of building web applications.
 * eslint, typescript-eslint
 * react
 * mobx
-* rxjs
 * inversify
 * reflect-metadata
+
+## Plugins
+
+* @stackino/due-plugin-progress
+  * Display github-like progress bar upon navigation.
+* @stackino/due-plugin-react
+  * Use react for rendering.
+* @stackino/due-plugin-router5
+  * Use router5 for routing.

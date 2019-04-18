@@ -1,9 +1,12 @@
-import { ContainerTag, Container, inject, injectable, RenderService, Page, Portalable, RenderServiceTag, RootPageComponent, Tag, Transition } from '@stackino/due';
+import { ContainerTag, Container, inject, injectable, RenderService, Portalable, RenderServiceTag, RootPage, Tag, Transition, Routable } from '@stackino/due';
 import * as React from 'react';
 import { useContext } from 'react';
 import * as ReactDOM from 'react-dom';
+import { Observer } from 'mobx-react-lite';
 
-export type ReactPage = Page<React.FunctionComponent>;
+export interface ReactPage extends Routable {
+	component: React.FunctionComponent;
+};
 
 export interface ReactPortal<TInput, TOutput> extends Portalable<TInput, TOutput> {
 	component: React.FunctionComponent;
@@ -27,12 +30,18 @@ export function useViewContext(): ViewContext {
 	return context;
 }
 
+export function useDependency<T>(tag: Tag<T>): T {
+	const context = useViewContext();
+
+	return context.container.get(tag);
+}
+
 function createViewElement(viewContext: ViewContext): React.ReactElement<any> {
-	var currentState = viewContext.transition.active[viewContext.index];
+	const currentState = viewContext.transition.active[viewContext.index];
 
 	// todo: sanity checks and warnings for accessing `page` and `component`
 
-	var Component = (currentState.page as ReactPage).component;
+	const Component = (currentState.page as ReactPage).component;
 	if (!Component.displayName) {
 		Component.displayName = `Component(${currentState.route.id})`;
 	}
@@ -43,11 +52,17 @@ function createViewElement(viewContext: ViewContext): React.ReactElement<any> {
 		index: viewContext.index + 1,
 	};
 
-	return <ViewContextContext.Provider value={nextViewContext}><Component /></ViewContextContext.Provider>;
+	return <ViewContextContext.Provider value={nextViewContext}>
+		<Observer>{() => <Component />}</Observer>
+	</ViewContextContext.Provider>;
 }
 
-export const View: React.FunctionComponent = (): React.ReactElement | null => {
-	const viewContext = useViewContext();
+interface ViewProps {
+	viewContext?: ViewContext;
+}
+
+export const View: React.FunctionComponent<ViewProps> = (props): React.ReactElement | null => {
+	const viewContext = props.viewContext || useViewContext();
 
 	if (!viewContext) {
 		return null;
@@ -81,8 +96,9 @@ export class ReactRenderService implements RenderService {
 			}
 
 			const el = this.portalRoots.get(portalable);
-			if (el) {
-				el.remove();
+			if (el && el.parentElement) {
+				// `el.remove()` is not supported in IE
+				el.parentElement.removeChild(el);
 			}
 			this.portalRoots.delete(portalable);
 		}
@@ -97,9 +113,9 @@ export class ReactRenderService implements RenderService {
 				this.portalRoots.set(portalable, el);
 			}
 
-			var Component = (portalable as ReactPortal<unknown, unknown>).component;
+			const Component = (portalable as ReactPortal<unknown, unknown>).component;
 
-			result.push(ReactDOM.createPortal(<Component />, el));
+			result.push(ReactDOM.createPortal(<Observer>{() => <Component />}</Observer>, el));
 		}
 
 		return result;
@@ -120,7 +136,7 @@ export class ReactRenderService implements RenderService {
 
 		const root = transition.active[0];
 
-		if (!root.page || (root.page as any).component !== RootPageComponent) {
+		if (root.page !== RootPage) {
 			throw new Error('Attempt to render invalid root state');
 		}
 		if (transition.active.length <= 1) {

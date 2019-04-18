@@ -10,12 +10,12 @@ export class BrowserRequest {
 	public parameters: Map<string, string>;
 
 	send(): void {
-		var form = document.createElement('form');
+		const form = document.createElement('form');
 		form.setAttribute('method', this.method);
 		form.setAttribute('action', this.action);
 
 		this.parameters.forEach((value, key) => {
-			var field = document.createElement('input');
+			const field = document.createElement('input');
 			field.setAttribute('type', 'hidden');
 			field.setAttribute('name', key);
 			field.setAttribute('value', value);

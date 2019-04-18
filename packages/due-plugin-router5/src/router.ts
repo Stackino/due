@@ -1,14 +1,13 @@
 import { Constructed, DefaultContainer, ContainerTag, inject, injectable, RouteRegistry, pathCombine, Route, Router, RouterHandler, RouterHandlerFactory, RouterHandlerFactoryTag, RouteRegistryTag, RouterTag, Transition, TransitionController } from '@stackino/due';
 import { createRouter as createRouter5, Dependencies as Dependencies5, NavigationOptions as NavigationOptions5, Plugin as Plugin5, Route as Route5, Router as Router5, State as State5 } from 'router5';
 import browserPlugin from 'router5-plugin-browser';
-import { Params } from 'router5/types/types/base';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Params as Params5 } from 'router5/types/types/base';
 
 const StackinoTransitionKey = Symbol('Stackino transition');
 
 const noParams: ReadonlyMap<string, string> = new Map();
 
-function params5ToParams(params5: Params): ReadonlyMap<string, string> {
+function params5ToParams(params5: Params5): ReadonlyMap<string, string> {
 	const params = new Map<string, string>();
 
 	for (const key in params5) {
@@ -77,7 +76,7 @@ export class Router5RouterHandler implements RouterHandler {
 					console.log('current route  ', toState);
 					console.groupEnd();
 
-					const transition = this.router.createTransitionToName(this.router.activeTransition.getValue(), toName, params5ToParams(toState.params));
+					const transition = this.router.createTransitionToName(this.router.activeTransition, toName, params5ToParams(toState.params));
 
 					(toState as any)[StackinoTransitionKey] = transition;
 				},
@@ -148,11 +147,6 @@ export class Router5RouterHandler implements RouterHandler {
 		});
 
 		this.router5.start();
-	}
-
-	private transitionsSubject: BehaviorSubject<Transition | null> = new BehaviorSubject<Transition | null>(null);
-	get transitions(): Observable<Transition | null> {
-		return this.transitionsSubject;
 	}
 
 	pathFor(route: Route, params?: ReadonlyMap<string, string> | undefined): string {

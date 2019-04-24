@@ -9,4 +9,4 @@ export * from './path-combine';
 export * from './promise-completition-source';
 export * from './provider';
 export * from './random-string';
-
+export * from './uid';

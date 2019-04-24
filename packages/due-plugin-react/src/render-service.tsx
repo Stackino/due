@@ -2,7 +2,7 @@ import { ContainerTag, Container, inject, injectable, RenderService, Portalable,
 import * as React from 'react';
 import { useContext } from 'react';
 import * as ReactDOM from 'react-dom';
-import { Observer } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 
 export interface ReactPage extends Routable {
 	component: React.FunctionComponent;
@@ -52,8 +52,10 @@ function createViewElement(viewContext: ViewContext): React.ReactElement<any> {
 		index: viewContext.index + 1,
 	};
 
+	const ObservedComponent = observer(Component);
+
 	return <ViewContextContext.Provider value={nextViewContext}>
-		<Observer>{() => <Component />}</Observer>
+		<ObservedComponent />
 	</ViewContextContext.Provider>;
 }
 
@@ -114,8 +116,9 @@ export class ReactRenderService implements RenderService {
 			}
 
 			const Component = (portalable as ReactPortal<unknown, unknown>).component;
+			const ObservedComponent = observer(Component);
 
-			result.push(ReactDOM.createPortal(<Observer>{() => <Component />}</Observer>, el));
+			result.push(ReactDOM.createPortal(<ObservedComponent />, el));
 		}
 
 		return result;
@@ -136,7 +139,7 @@ export class ReactRenderService implements RenderService {
 
 		const root = transition.active[0];
 
-		if (root.page !== RootPage) {
+		if (!(root.page instanceof RootPage)) {
 			throw new Error('Attempt to render invalid root state');
 		}
 		if (transition.active.length <= 1) {

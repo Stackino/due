@@ -186,7 +186,7 @@ export class DefaultRouter implements Router {
 		return this.createTransition(from, to, toParams);
 	}
 
-	isActive(route: Route, _params?: ReadonlyMap<string, string>): boolean {
+	isActive(route: Route, params?: ReadonlyMap<string, string>): boolean {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -196,8 +196,7 @@ export class DefaultRouter implements Router {
 			return false;
 		}
 
-		// todo: check params
-		return transition.active.findIndex(s => s.route === route) !== -1;
+		return transition.active.findIndex(s => Route.equals(s.route, transition.toParams, route, params)) !== -1;
 	}
 
 	isActiveId(id: string, params?: ReadonlyMap<string, string>): boolean {

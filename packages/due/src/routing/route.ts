@@ -56,6 +56,30 @@ export class Route {
 
 		return descendants;
 	}
+
+	/**
+	 * Determines whether route `a` equals to route `b`.
+	 * @param a Route `a`
+	 * @param aParams Params for route `a`.
+	 * @param b Route `b`
+	 * @param bParams Params for route `b`. If omited params are not compared.
+	 */
+	static equals(a: Route, aParams: ReadonlyMap<string, string>, b: Route, bParams?: ReadonlyMap<string, string>): boolean {
+		// constructed routes shouldn't have copies
+		if (a !== b) {
+			return false;
+		}
+	
+		if (bParams) {
+			for (const paramName of a.fullParams) {
+				if (aParams.get(paramName) !== bParams.get(paramName)) {
+					return false;
+				}
+			}
+		}
+	
+		return true;
+	}
 }
 
 function normalizeRoutePath(path: string): string {

@@ -1,10 +1,10 @@
-import { Router, RouterTag } from '@stackino/due';
+import { RouterTag } from '@stackino/due';
 import * as classNames from 'classnames';
-import { autobind } from 'core-decorators';
 import * as React from 'react';
-import { ViewContextContext } from './render-service';
+import { useDependency } from './render-service';
+import { observer } from 'mobx-react-lite';
 
-function normalizeParams(params?: ReadonlyMap<string, string> | { [key: string]: string } | undefined): Map<string, string> | undefined {
+function normalizeParams(params?: ReadonlyMap<string, string> | { [key: string]: unknown } | undefined): Map<string, string> | undefined {
 	if (!params) {
 		return undefined;
 	} else if (params instanceof Map) {
@@ -13,12 +13,12 @@ function normalizeParams(params?: ReadonlyMap<string, string> | { [key: string]:
 	} else if (typeof params === 'object' && params !== null) {
 		const paramsMap = new Map<string, string>();
 
-		for (const pair of Object.entries(params)) {
-			if (!pair[1]) {
+		for (const [key, value] of Object.entries(params)) {
+			if (value === null || value === undefined) {
 				continue;
 			}
 
-			paramsMap.set(pair[0], pair[1].toString());
+			paramsMap.set(key, (value as any).toString());
 		}
 
 		return paramsMap;
@@ -32,6 +32,7 @@ export interface LinkProps {
 	to: string;
 	params?: ReadonlyMap<string, string> | { [key: string]: string };
 	activeName?: string;
+	activeParams?: ReadonlyMap<string, string> | { [key: string]: string };
 
 	id?: string;
 	style?: React.CSSProperties;
@@ -39,36 +40,20 @@ export interface LinkProps {
 	activeClassName: string;
 }
 
-export class Link extends React.Component<LinkProps> {
-
-	static defaultProps = {
-		activeClassName: 'active',
-	};
-
-	@autobind
-	private handleClick(event: React.MouseEvent, router: Router): void {
+export const Link: React.FunctionComponent<LinkProps> = observer(({ to, params, activeName, activeParams, id, style, className, activeClassName, children }) => {
+	const router = useDependency(RouterTag);
+	const handleClick = React.useCallback((event: React.MouseEvent) => {
 		event.preventDefault();
 		event.stopPropagation();
 
-		router.goToName(this.props.to, normalizeParams(this.props.params));
-	}
+		router.goToName(to, normalizeParams(params));
+	}, [router, to, params]);
 
-	render() {
-		const {
-			to, params, activeName,
-			id, style, className, activeClassName,
-			children,
-		} = this.props;
-
-		return (
-			<ViewContextContext.Consumer>{(viewContext) => {
-				const routerService = viewContext!.container.get(RouterTag);
-
-				return <a
-					href={routerService.pathForName(to, normalizeParams(params))} onClick={(event) => this.handleClick(event, routerService)}
-					id={id} className={classNames(className, routerService.isActiveName(activeName || to) && activeClassName)} style={style}
-				>{children}</a>;
-			}}</ViewContextContext.Consumer>
-		);
-	}
-}
+	return <a
+		href={router.pathForName(to, normalizeParams(params))} onClick={handleClick}
+		id={id} className={classNames(className, router.isActiveName(activeName || to, normalizeParams(activeParams || params)) && activeClassName)} style={style}
+	>{children}</a>;
+});
+Link.defaultProps = {
+	activeClassName: 'active',
+};

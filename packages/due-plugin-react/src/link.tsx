@@ -37,7 +37,7 @@ export interface LinkProps {
 	id?: string;
 	style?: React.CSSProperties;
 	className?: string;
-	activeClassName: string;
+	activeClassName?: string;
 }
 
 export const Link: React.FunctionComponent<LinkProps> = observer(({ to, params, activeName, activeParams, id, style, className, activeClassName, children }) => {

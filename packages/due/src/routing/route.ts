@@ -1,5 +1,6 @@
 import { executeProvider, pathCombine, Provider } from '../tools';
 import { RouteDeclaration, LayoutRouteDeclaration, RootRouteDeclaration } from './route-declaration';
+import { Path } from 'path-parser';
 
 export class Route {
 	constructor(
@@ -7,10 +8,32 @@ export class Route {
 		readonly id: string,
 		readonly name: string | null,
 		readonly path: string | null,
+		readonly params: string[],
 		readonly fullPath: string | null,
+		readonly fullParams: string[],
 		readonly parent: Route | null,
 		readonly children: ReadonlyArray<Route>
 	) {
+	}
+
+	private _parents: ReadonlyArray<Route> | null = null;
+	public get parents(): ReadonlyArray<Route> {
+		if (this._parents) {
+			return this._parents;
+		}
+
+		const parents: Route[] = [];
+
+		let parent = this.parent;
+		while (parent) {
+			parents.push(parent);
+
+			parent = parent.parent;
+		}
+
+		this._descendants = parents;
+
+		return parents;
 	}
 
 	private _descendants: ReadonlyArray<Route> | null = null;
@@ -109,14 +132,37 @@ function buildFullRoutePath(route: RouteDeclaration, parent: Route | null): stri
 	return normalizeRoutePath(result);
 }
 
+function buildRouteParams(route: RouteDeclaration): string[] {
+	if (!route.path) {
+		return [];
+	}
+
+	const path = Path.createPath(route.path);
+	
+	return path.params;
+}
+
+function buildRouteFullParams(route: RouteDeclaration, parent: Route | null): string[] {
+	let result: string[] = [];
+
+	if (parent) {
+		result = result.concat(parent.fullParams);
+	}
+	result = result.concat(buildRouteParams(route));
+
+	return result;
+}
+
 /* eslint-disable @typescript-eslint/no-use-before-define */
 export async function buildRoute(declaration: RouteDeclaration, id: string, parent: Route | null = null): Promise<Route> {
 	const uid = parent ? `${parent.id}.${id}` : id;
 	const name = buildRouteName(declaration, parent);
 	const path = buildRoutePath(declaration);
+	const params = buildRouteParams(declaration);
 	const fullPath = buildFullRoutePath(declaration, parent);
+	const fullParams = buildRouteFullParams(declaration, parent);
 	const children: Route[] = [];
-	const route = new Route(declaration, uid, name, path, fullPath, parent, children);
+	const route = new Route(declaration, uid, name, path, params, fullPath, fullParams, parent, children);
 
 	if (declaration instanceof RootRouteDeclaration || declaration instanceof LayoutRouteDeclaration) {
 		const childRoutes = await buildRoutes(declaration.children, route);

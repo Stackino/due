@@ -201,7 +201,7 @@ export class Router5RouterHandlerFactory implements RouterHandlerFactory {
 		const nameToAlias = new Map<string, string>();
 
 		const route5s: Route5[] = [];
-
+		
 		for (const route of this.routeRegistry.root.descendants) {
 			let name = route.name;
 			let path = route.path;

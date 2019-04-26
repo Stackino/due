@@ -27,6 +27,21 @@ export interface Transition {
 	readonly active: ReadonlyArray<State>;
 }
 
+function routeEquals(a: Route, aParams: ReadonlyMap<string, string>, b: Route, bParams: ReadonlyMap<string, string>): boolean {
+	// constructed routes shouldn't have copies
+	if (a !== b) {
+		return false;
+	}
+
+	for (const paramName of a.fullParams) {
+		if (aParams.get(paramName) !== bParams.get(paramName)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 /**
  * Represents single lifecycle of a transition.
  */
@@ -103,14 +118,18 @@ export class TransitionController implements Transition {
 
 		let intersection: Route | null = null;
 		if (this.from) {
-			let retaining = false;
-			for (let i = this.from.active.length - 1; i >= 0; i--) {
+			let retaining = true;
+
+			for (let i = 0; i < this.from.active.length; i++) {
 				const current = this.from.active[i];
 
-				if (!retaining) {
-					retaining = current.route === this.to || current.route.descendants.findIndex(x => x === this.to) !== -1;
-
-					if (retaining) {
+				if (retaining) {
+					if (
+						!routeEquals(current.route, this.from.toParams, this.to, this.toParams) &&
+						this.to.parents.findIndex(x => routeEquals(current.route, this.from!.toParams, x, this.toParams)) === -1
+					) {
+						retaining = false;
+					} else {
 						intersection = current.route;
 					}
 				}
@@ -118,7 +137,7 @@ export class TransitionController implements Transition {
 				if (retaining) {
 					const retainingPromise = this.createRetainingState(current);
 
-					retainedPromises.unshift(retainingPromise);
+					retainedPromises.push(retainingPromise);
 				} else {
 					const exitingPromise = this.createExitingState( current);
 

@@ -30,9 +30,9 @@ function normalizeParams(params?: ReadonlyMap<string, string> | { [key: string]:
 
 export interface LinkProps {
 	to: string;
-	params?: ReadonlyMap<string, string> | { [key: string]: string };
+	params?: ReadonlyMap<string, string> | { [key: string]: unknown };
 	activeName?: string;
-	activeParams?: ReadonlyMap<string, string> | { [key: string]: string };
+	activeParams?: ReadonlyMap<string, string> | { [key: string]: unknown };
 
 	id?: string;
 	style?: React.CSSProperties;

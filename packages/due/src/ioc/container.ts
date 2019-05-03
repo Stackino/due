@@ -127,7 +127,7 @@ export class DefaultContainer implements Container {
 	 * @param obj Object with injectable properties.
 	 */
 	inject<T>(obj: T): T {
-		const injectProperties: (string | symbol)[] | undefined = Reflect.getMetadata('stackino:ioc:inject-properties', obj);
+		const injectProperties: (string | symbol)[] | undefined = Reflect.getMetadata('stackino:ioc:inject-properties', obj.constructor);
 
 		if (injectProperties) {
 			for (const injectProperty of injectProperties) {
@@ -137,11 +137,16 @@ export class DefaultContainer implements Container {
 
 				const tag = Reflect.getMetadata('stackino:ioc:inject-from', obj, injectProperty);
 
-				const value = this.impl.get(tag.symbol);
+				if (tag && tag.symbol) {
+					const value = this.impl.get(tag.symbol);
 
-				this.inject(value);
+					this.inject(value);
 
-				(obj as any)[injectProperty] = value;
+					(obj as any)[injectProperty] = value;
+				} else {
+					typeof console === 'object' && console !== null && typeof console.warn === 'function' &&
+						console.warn(`Annotation 'stackino:ioc:inject-from' for property '${injectProperty.toString()}' has invalid tag '${tag}'`);
+				}
 			}
 		}
 

@@ -3,8 +3,6 @@ import { ContainerKey } from '..';
 import { DiagnosticsServiceTag } from '../diagnostics';
 import { Container } from '../ioc';
 
-// TODO: move mobx to plugin?
-
 const trace = false;
 
 type Flow<TSelf> = (this: TSelf, ...args: any[]) => (AsyncIterableIterator<SideEffect> | IterableIterator<SideEffect> | PromiseLike<SideEffect | void> | void);

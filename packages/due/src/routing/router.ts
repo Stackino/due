@@ -1,10 +1,10 @@
 import { Tag, injectable, inject, ContainerTag, Container } from '../ioc';
 import { Transition, TransitionController, TransitionStatus } from './transition';
 import { Route } from './route';
-import { Portalable } from './portalable';
+import { Portal, PortalController, PortalLifecycle } from './portalable';
 import { RouteRegistryTag, RouteRegistry, RouteDeclaration, State } from '.';
 import { PromiseCompletitionSource, executeProvider } from '..';
-import { observable } from 'mobx';
+import { observable, when } from 'mobx';
 
 export const RouterHandlerFactoryTag = new Tag<RouterHandlerFactory>('Stackino router handler factory');
 export const RouterTag = new Tag<Router>('Stackino router');
@@ -32,8 +32,8 @@ export interface RouterHandlerFactory {
 
 export interface Router {
 	readonly activeTransition: Transition | null;
-	readonly pendingTransitions: ReadonlyArray<Transition>;
-	readonly portals: ReadonlyArray<Portalable<unknown, unknown>>;
+	readonly pendingTransitions: readonly Transition[];
+	readonly portals: readonly Portal<unknown, unknown>[];
 	readonly latestTransitionId: string | null;
 
 	start(): Promise<void>;
@@ -55,56 +55,12 @@ export interface Router {
 	goToId(id: string, params?: ReadonlyMap<string, string>): void;
 	goToName(name: string, params?: ReadonlyMap<string, string>): void;
 
-	portal<TInput, TOutput>(portalClass: new () => Portalable<TInput, TOutput>, input: TInput): Promise<TOutput>;
-	openPortal<TPortal extends Portalable<TInput, unknown>, TInput>(portalClass: new () => TPortal, input: TInput): Promise<TPortal>;
-	waitForPortal<TOutput>(portal: Portalable<unknown, TOutput>): Promise<TOutput>;
-	closePortal<TOutput>(portal: Portalable<unknown, TOutput>): Promise<TOutput>;
+	portal<TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => Portal<TInput, TOutput>, input: TInput): Promise<TOutput | null>;
+	openPortal<TPortal extends Portal<TInput, TOutput>, TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => TPortal, input: TInput): Promise<TPortal>;
+	waitForPortal<TOutput>(portal: Portal<unknown, TOutput>): Promise<TOutput | null>;
+	closePortal<TOutput>(portal: Portal<unknown, TOutput>): Promise<TOutput | null>;
 
 	stop(): Promise<void>;
-}
-
-class PortalLifecycle {
-	constructor(
-		container: Container,
-		portalClass: new () => Portalable<unknown, unknown>,
-		private input: unknown
-	) {
-		this.portal = new portalClass();
-		container.inject(this.portal);
-	}
-
-	readonly portal: Portalable<unknown, unknown>;
-
-	private finishedSource = new PromiseCompletitionSource<unknown>();
-	get finished(): Promise<unknown> { return this.finishedSource.promise; }
-
-	async enter(): Promise<void> {
-		if (this.portal.enter) {
-			const commit = await this.portal.enter(this.input);
-
-			if (typeof commit === 'function') {
-				commit();
-			}
-		}
-	}
-
-	async exit(): Promise<unknown> {
-		let result: unknown = undefined;
-
-		if (this.portal.exit) {
-			const commit = await this.portal.exit();
-
-			if (typeof commit === 'function') {
-				result = commit();
-			} else {
-				result = commit;
-			}
-		}
-
-		this.finishedSource.tryResolve(result);
-
-		return result;
-	}
 }
 
 @injectable(RouterTag)
@@ -281,37 +237,37 @@ export class DefaultRouter implements Router {
 
 	// portals - todo: move
 
-	private portalLifecycles: Map<Portalable<unknown, unknown>, PortalLifecycle> = new Map();
-	private portalsValue = observable.box<Portalable<unknown, unknown>[]>([]);
-	get portals(): Portalable<unknown, unknown>[] {
+	private portalLifecycles: Map<Portal<unknown, unknown>, PortalLifecycle> = new Map();
+	private portalsValue = observable.box<Portal<unknown, unknown>[]>([]);
+	get portals(): Portal<unknown, unknown>[] {
 		return this.portalsValue.get();
 	}
 
-	async portal<TInput, TOutput>(portalClass: new () => Portalable<TInput, TOutput>, input: TInput): Promise<TOutput> {
+	async portal<TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => Portal<TInput, TOutput>, input: TInput): Promise<TOutput | null> {
 		const portal = await this.openPortal(portalClass, input);
 
 		return this.waitForPortal(portal);
 	}
 
-	async openPortal<TPortal extends Portalable<TInput, unknown>, TInput>(portalClass: new () => TPortal, input: TInput): Promise<TPortal> {
+	async openPortal<TPortal extends Portal<TInput, TOutput>, TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => TPortal, input: TInput): Promise<TPortal> {
 		if (!this.handler || !this.portals) {
 			throw new Error('Attempt to use stopped router');
 		}
 
-		const lifecycle = new PortalLifecycle(this.container, portalClass, input);
-		this.portalLifecycles.set(lifecycle.portal, lifecycle);
+		const lifecycle = new PortalLifecycle(this.container, portalClass as any /* todo: can we make this safer? */, input);
+		this.portalLifecycles.set(lifecycle.instance, lifecycle);
 
-		const nextPortals: Portalable<unknown, unknown>[] = [];
+		const nextPortals: Portal<unknown, unknown>[] = [];
 		nextPortals.push.apply(nextPortals, this.portals);
-		nextPortals.push(lifecycle.portal);
+		nextPortals.push(lifecycle.instance);
 		this.portalsValue.set(nextPortals);
 
-		await lifecycle.enter();
+		await lifecycle.open();
 
-		return lifecycle.portal as TPortal;
+		return lifecycle.instance as any /* todo: can we make this safer? */;
 	}
 
-	async waitForPortal<TOutput>(portal: Portalable<unknown, TOutput>): Promise<TOutput> {
+	async waitForPortal<TOutput>(portal: Portal<unknown, TOutput>): Promise<TOutput | null> {
 		if (!this.handler || !this.portals) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -322,12 +278,12 @@ export class DefaultRouter implements Router {
 			throw new Error('Attempt to wait for non-existing portal');
 		}
 
-		const result = await lifecycle.finished;
+		await lifecycle.finished;
 
-		return result as TOutput;
+		return lifecycle.controller.output as TOutput;
 	}
 
-	async closePortal<TOutput>(portal: Portalable<unknown, TOutput>): Promise<TOutput> {
+	async closePortal<TOutput>(portal: Portal<unknown, TOutput>): Promise<TOutput | null> {
 		if (!this.handler || !this.portals) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -338,11 +294,11 @@ export class DefaultRouter implements Router {
 			throw new Error('Attempt to close non-existing portal');
 		}
 
-		let result = await lifecycle.exit();
+		await lifecycle.close();
 
-		const nextPortals: Portalable<unknown, unknown>[] = [];
+		const nextPortals: Portal<unknown, unknown>[] = [];
 		nextPortals.push.apply(nextPortals, this.portals);
-		const index = nextPortals.indexOf(lifecycle.portal);
+		const index = nextPortals.indexOf(lifecycle.instance);
 		if (index !== -1) {
 			nextPortals.splice(index, 1);
 		}
@@ -350,7 +306,7 @@ export class DefaultRouter implements Router {
 
 		this.portalLifecycles.delete(portal);
 
-		return result as TOutput;
+		return lifecycle.controller.output as TOutput;
 	}
 
 	// /portals

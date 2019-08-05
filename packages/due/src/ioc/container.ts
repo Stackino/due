@@ -127,7 +127,7 @@ export class DefaultContainer implements Container {
 	 * @param obj Object with injectable properties.
 	 */
 	inject<T>(obj: T): T {
-		const injectProperties: (string | symbol)[] | undefined = Reflect.getMetadata('stackino:ioc:inject-properties', obj.constructor);
+		const injectProperties: (string | symbol)[] | undefined = Reflect.getMetadata('stackino:ioc:inject-properties', (obj as any).constructor);
 
 		if (injectProperties) {
 			for (const injectProperty of injectProperties) {

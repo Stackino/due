@@ -1,6 +1,6 @@
 import { inject, injectable, Tag } from '../ioc';
 import { RenderService, RenderServiceTag } from '../rendering';
-import { Portalable, Router, RouterTag, Transition } from '../routing';
+import { Portal, Router, RouterTag, Transition } from '../routing';
 import { reaction, comparer, IReactionDisposer } from 'mobx';
 
 export const ViewServiceTag = new Tag<ViewService>('Stackino view service');
@@ -21,7 +21,7 @@ export class DefaultViewService implements ViewService {
 	private subscription: IReactionDisposer | null = null;
 
 	private activeTransition: Transition | null = null;
-	private activePortals: ReadonlyArray<Portalable<unknown, unknown>> | null = null;
+	private activePortals: readonly Portal<unknown, unknown>[] | null = null;
 	private running: boolean = false;
 
 	start(): Promise<void> {
@@ -33,7 +33,7 @@ export class DefaultViewService implements ViewService {
 
 		this.subscription = reaction(
 			() => {
-				const value: [Transition | null, ReadonlyArray<Portalable<unknown, unknown>>] = [this.router.activeTransition, this.router.portals];
+				const value: [Transition | null, readonly Portal<unknown, unknown>[]] = [this.router.activeTransition, this.router.portals];
 
 				return value;	
 			}, 

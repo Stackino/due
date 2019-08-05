@@ -1,15 +1,17 @@
-import { ContainerTag, Container, inject, injectable, RenderService, Portalable, RenderServiceTag, RootPage, Tag, Transition, Routable } from '@stackino/due';
+import { ContainerTag, Container, inject, injectable, RenderService, Portal, RenderServiceTag, RootPage, Tag, Transition, Routable } from '@stackino/due';
 import * as React from 'react';
 import { useContext } from 'react';
 import * as ReactDOM from 'react-dom';
 import { observer } from 'mobx-react-lite';
 
+const ObservedComponentKey = Symbol('Stackino due react observed component');
+
 export interface ReactPage extends Routable {
 	component: React.FunctionComponent;
 };
 
-export interface ReactPortal<TInput, TOutput> extends Portalable<TInput, TOutput> {
-	component: React.FunctionComponent;
+export abstract class ReactPortal<TInput, TOutput> extends Portal<TInput, TOutput> {
+	abstract template: React.FunctionComponent;
 }
 
 export type RenderContext = PageContext | PortalContext;
@@ -64,8 +66,8 @@ export function useDependency<T>(tag: Tag<T>): T {
 	return context.container.get(tag);
 }
 
-function createPageElement(viewContext: PageContext): React.ReactElement<any> {
-	const currentState = viewContext.transition.active[viewContext.index];
+function createPageElement(pageContext: PageContext): React.ReactElement<any> {
+	const currentState = pageContext.transition.active[pageContext.index];
 
 	// todo: sanity checks and warnings for accessing `page` and `component`
 
@@ -74,32 +76,39 @@ function createPageElement(viewContext: PageContext): React.ReactElement<any> {
 		Component.displayName = `Component(${currentState.route.id})`;
 	}
 
-	const nextPageContext: PageContext = {
-		kind: 'page',
-		container: viewContext.container,
-		transition: viewContext.transition,
-		index: viewContext.index + 1,
-	};
+	if (!Component.hasOwnProperty(ObservedComponentKey)) {
+		Object.defineProperty(Component, ObservedComponentKey, {
+			value: observer(Component),
+			enumerable: false,
+		});
+	}
 
-	const ObservedComponent = observer(Component);
+	const ObservedComponent = (Component as any)[ObservedComponentKey];
 
-	return <RenderContextContext.Provider value={nextPageContext}>
+	return <RenderContextContext.Provider value={pageContext}>
 		<ObservedComponent />
 	</RenderContextContext.Provider>;
 }
 
 interface ViewProps {
-	viewContext?: PageContext;
+	pageContext?: PageContext;
 }
 
 export const View: React.FunctionComponent<ViewProps> = (props): React.ReactElement | null => {
-	const pageContext = props.viewContext || usePageContext();
+	const pageContext = props.pageContext || usePageContext();
 
 	if (!pageContext) {
 		return null;
 	}
 
-	return createPageElement(pageContext);
+	const nextPageContext: PageContext = {
+		kind: 'page',
+		container: pageContext.container,
+		transition: pageContext.transition,
+		index: pageContext.index + 1,
+	};
+
+	return createPageElement(nextPageContext);
 }
 
 export const ReactRenderServiceOptionsTag = new Tag<ReactRenderServiceOptions>('Stackino react render service options');
@@ -116,35 +125,37 @@ export class ReactRenderService implements RenderService {
 	@inject(ReactRenderServiceOptionsTag)
 	private options!: ReactRenderServiceOptions;
 
-	private portalRoots: Map<Portalable<unknown, unknown>, HTMLDivElement> = new Map();
+	private portalRoots: Map<Portal<unknown, unknown>, HTMLDivElement> = new Map();
 
 	private domServer: typeof import('react-dom/server') | null = null;
 
-	private createPortals(portalables: ReadonlyArray<Portalable<unknown, unknown>>): React.ReactPortal[] {
-		for (const portalable of this.portalRoots.keys()) {
-			if (portalables.indexOf(portalable) !== -1) {
+	private rootPageContext: PageContext | null = null;
+
+	private createPortals(portals: readonly Portal<unknown, unknown>[]): React.ReactPortal[] {
+		for (const portal of this.portalRoots.keys()) {
+			if (portals.indexOf(portal) !== -1) {
 				continue;
 			}
 
-			const el = this.portalRoots.get(portalable);
+			const el = this.portalRoots.get(portal);
 			if (el && el.parentElement) {
 				// `el.remove()` is not supported in IE
 				el.parentElement.removeChild(el);
 			}
-			this.portalRoots.delete(portalable);
+			this.portalRoots.delete(portal);
 		}
 
 		const result: React.ReactPortal[] = [];
 
-		for (const portalable of portalables) {
-			let el = this.portalRoots.get(portalable);
+		for (const portal of portals) {
+			let el = this.portalRoots.get(portal);
 			if (!el) {
 				el = document.createElement('div');
 				document.body.appendChild(el);
-				this.portalRoots.set(portalable, el);
+				this.portalRoots.set(portal, el);
 			}
 
-			const Component = (portalable as ReactPortal<unknown, unknown>).component;
+			const Component = (portal as ReactPortal<unknown, unknown>).template;
 			const ObservedComponent = observer(Component);
 
 			const nextPortalContext: PortalContext = {
@@ -152,9 +163,10 @@ export class ReactRenderService implements RenderService {
 				container: this.container,
 			};
 
+			// todo: better keys
 			result.push(ReactDOM.createPortal(<RenderContextContext.Provider value={nextPortalContext}>
 				<ObservedComponent />
-			</RenderContextContext.Provider>, el));
+			</RenderContextContext.Provider>, el, `portal-${portals.indexOf(portal)}`));
 		}
 
 		return result;
@@ -168,7 +180,7 @@ export class ReactRenderService implements RenderService {
 		return Promise.resolve();
 	}
 
-	render(transition: Transition | null, portals: ReadonlyArray<Portalable<unknown, unknown>>): void {
+	render(transition: Transition | null, portals: readonly Portal<unknown, unknown>[]): void {
 		if (!transition) {
 			return;
 		}
@@ -182,17 +194,26 @@ export class ReactRenderService implements RenderService {
 			throw new Error('No active state');
 		}
 
-		const rootPageContext: PageContext = {
-			kind: 'page',
-			container: this.container,
-			transition,
-			index: 1,
-		};
+		let rootPageContext: PageContext;
+
+		if (this.rootPageContext && this.rootPageContext.transition === transition) {
+			rootPageContext = this.rootPageContext;
+		} else {
+			rootPageContext = this.rootPageContext = {
+				kind: 'page',
+				container: this.container,
+				transition,
+				index: 1,
+			};
+		}
 
 		const rootViewElement = createPageElement(rootPageContext);
 		const portalElements = this.createPortals(portals);
 
-		const appElement = <>{rootViewElement}{portalElements}</>;
+		const appElement = <>
+			{rootViewElement}
+			{portalElements}
+		</>;
 
 		if (typeof this.options.output === 'function') {
 			const html = this.domServer!.renderToString(appElement);

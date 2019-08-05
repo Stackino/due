@@ -12,12 +12,12 @@ export class Route {
 		readonly fullPath: string | null,
 		readonly fullParams: string[],
 		readonly parent: Route | null,
-		readonly children: ReadonlyArray<Route>
+		readonly children: readonly Route[]
 	) {
 	}
 
-	private _parents: ReadonlyArray<Route> | null = null;
-	public get parents(): ReadonlyArray<Route> {
+	private _parents: readonly Route[] | null = null;
+	public get parents(): readonly Route[] {
 		if (this._parents) {
 			return this._parents;
 		}
@@ -36,8 +36,8 @@ export class Route {
 		return parents;
 	}
 
-	private _descendants: ReadonlyArray<Route> | null = null;
-	public get descendants(): ReadonlyArray<Route> {
+	private _descendants: readonly Route[] | null = null;
+	public get descendants(): readonly Route[] {
 		if (this._descendants) {
 			return this._descendants;
 		}

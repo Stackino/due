@@ -21,10 +21,10 @@ export interface Transition {
 	readonly toParams: ReadonlyMap<string, string>;
 	readonly status: TransitionStatus;
 	readonly finished: Promise<void>;
-	readonly entering: ReadonlyArray<State>;
-	readonly retained: ReadonlyArray<State>;
-	readonly exiting: ReadonlyArray<State>;
-	readonly active: ReadonlyArray<State>;
+	readonly entering: readonly State[];
+	readonly retained: readonly State[];
+	readonly exiting: readonly State[];
+	readonly active: readonly State[];
 }
 
 /**
@@ -227,8 +227,8 @@ export class TransitionController implements Transition {
 		return this._status;
 	}
 
-	private _entering: ReadonlyArray<State> | null = null;
-	public get entering(): ReadonlyArray<State> {
+	private _entering: readonly State[] | null = null;
+	public get entering(): readonly State[] {
 		if (!this._entering) {
 			throw new Error('Attempt to obtain entering states while transition is loading.');
 		}
@@ -236,8 +236,8 @@ export class TransitionController implements Transition {
 		return this._entering;
 	}
 
-	private _retained: ReadonlyArray<State> | null = null;
-	public get retained(): ReadonlyArray<State> {
+	private _retained: readonly State[] | null = null;
+	public get retained(): readonly State[] {
 		if (!this._retained) {
 			throw new Error('Attempt to obtain retained states while transition is loading.');
 		}
@@ -245,8 +245,8 @@ export class TransitionController implements Transition {
 		return this._retained;
 	}
 
-	private _exiting: ReadonlyArray<State> | null = null;
-	public get exiting(): ReadonlyArray<State> {
+	private _exiting: readonly State[] | null = null;
+	public get exiting(): readonly State[] {
 		if (!this._exiting) {
 			throw new Error('Attempt to obtain exiting states while transition is loading.');
 		}
@@ -254,8 +254,8 @@ export class TransitionController implements Transition {
 		return this._exiting;
 	}
 
-	private _active: ReadonlyArray<State> | null = null;
-	public get active(): ReadonlyArray<State> {
+	private _active: readonly State[] | null = null;
+	public get active(): readonly State[] {
 		if (this._active) {
 			return this._active;
 		}

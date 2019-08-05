@@ -262,6 +262,18 @@ export class DefaultRouter implements Router {
 		nextPortals.push(lifecycle.instance);
 		this.portalsValue.set(nextPortals);
 
+		lifecycle.finished.then(() => {
+			const nextPortals: Portal<unknown, unknown>[] = [];
+			nextPortals.push.apply(nextPortals, this.portals);
+			const index = nextPortals.indexOf(lifecycle.instance);
+			if (index !== -1) {
+				nextPortals.splice(index, 1);
+			}
+			this.portalsValue.set(nextPortals);
+	
+			this.portalLifecycles.delete(lifecycle.instance);
+		});
+
 		await lifecycle.open();
 
 		return lifecycle.instance as any /* todo: can we make this safer? */;
@@ -295,16 +307,6 @@ export class DefaultRouter implements Router {
 		}
 
 		await lifecycle.close();
-
-		const nextPortals: Portal<unknown, unknown>[] = [];
-		nextPortals.push.apply(nextPortals, this.portals);
-		const index = nextPortals.indexOf(lifecycle.instance);
-		if (index !== -1) {
-			nextPortals.splice(index, 1);
-		}
-		this.portalsValue.set(nextPortals);
-
-		this.portalLifecycles.delete(portal);
 
 		return lifecycle.controller.output as TOutput;
 	}

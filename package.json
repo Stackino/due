@@ -4,6 +4,8 @@
         "init": "yarn install --frozen-lockfile",
         "build:dev": "yarn workspaces run build:dev",
         "build:prod": "yarn workspaces run build:prod",
+        "docs:dev": "vuepress dev ./docs-src",
+        "docs:prod": "vuepress build ./docs-src --dest ./docs",
         "test": "yarn workspaces run test"
     },
     "workspaces": [

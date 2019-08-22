@@ -191,16 +191,14 @@ export async function buildRoute(declaration: RouteDeclaration, id: string, pare
 	if (declaration instanceof RootRouteDeclaration || declaration instanceof LayoutRouteDeclaration) {
 		const childRoutes = await buildRoutes(declaration.children, route);
 
-		children.push.apply(children, childRoutes);
+		children.push(...childRoutes);
 	}
 
 	return route;
 }
 /* eslint-enable @typescript-eslint/no-use-before-define */
 
-export async function buildRoutes(provider: Provider<RouteDeclaration[]>, parent: Route | null = null): Promise<Route[]> {
-	const declarations = await executeProvider(provider);
-
+export async function buildRoutes(declarations: RouteDeclaration[], parent: Route | null = null): Promise<Route[]> {
 	const result: Route[] = [];
 
 	let index = 0;

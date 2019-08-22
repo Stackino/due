@@ -1,12 +1,14 @@
-import { BindingScope, DefaultContainer, Plugin, RenderServiceTag } from '@stackino/due';
+import { BindingScope, DefaultContainer, Plugin, RenderServiceTag } from '@stackino/due-core';
 import { ReactRenderService, ReactRenderServiceOptions, ReactRenderServiceOptionsTag } from './render-service';
 
 export interface ReactPluginOptions {
 	output: string | HTMLElement | ((html: string) => void);
 }
 
-export class ReactPlugin implements Plugin {
+export class ReactPlugin extends Plugin {
 	constructor(options: ReactPluginOptions) {
+		super();
+		
 		let output = options.output;
 
 		if (typeof output === 'string') {
@@ -36,7 +38,7 @@ export class ReactPlugin implements Plugin {
 
 	private options: ReactRenderServiceOptions;
 
-	configureServices(container: DefaultContainer): void {
+	configureServices(container: DefaultContainer) {
 		container.bindConstantValue(ReactRenderServiceOptionsTag, this.options);
 		container.bind(RenderServiceTag, ReactRenderService, BindingScope.singleton);
 	}

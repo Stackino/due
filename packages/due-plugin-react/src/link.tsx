@@ -1,4 +1,4 @@
-import { RouterTag } from '@stackino/due';
+import { RouterTag } from '@stackino/due-core';
 import * as classNames from 'classnames';
 import * as React from 'react';
 import { useDependency } from './render-service';

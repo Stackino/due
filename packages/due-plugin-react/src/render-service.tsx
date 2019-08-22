@@ -1,4 +1,4 @@
-import { ContainerTag, Container, inject, injectable, RenderService, Portal, RenderServiceTag, RootPage, Tag, Transition, Routable } from '@stackino/due';
+import { ContainerTag, Container, inject, injectable, RenderService, Portal, RenderServiceTag, RootPage, Tag, Transition, Routable } from '@stackino/due-core';
 import * as React from 'react';
 import { useContext } from 'react';
 import * as ReactDOM from 'react-dom';
@@ -6,8 +6,8 @@ import { observer } from 'mobx-react-lite';
 
 const ObservedComponentKey = Symbol('Stackino due react observed component');
 
-export interface ReactPage extends Routable {
-	component: React.FunctionComponent;
+export abstract class ReactPage extends Routable {
+	abstract component: React.FunctionComponent;
 };
 
 export abstract class ReactPortal<TInput, TOutput> extends Portal<TInput, TOutput> {

@@ -1,8 +1,5 @@
-import { Tag, inject } from 'ioc';
-import { RouterTag, Container, PromiseCompletitionSource } from '..';
-import { delay } from 'tools';
+import { Container, PromiseCompletitionSource } from '..';
 import { observable, when } from 'mobx';
-import { Router } from './router';
 
 export class PortalLifecycle {
 	constructor(
@@ -130,49 +127,3 @@ export abstract class Portal<TInput, TOutput> {
 	onClosing?(): void | Promise<void | (() => void)>;
 	onClosed?(): void | Promise<void | (() => void)>;
 }
-
-// abstract class PortalBuilder {
-// 	abstract dependency<TDependency>(tag: Tag<TDependency>): TDependency;
-
-// 	abstract whenEntered<THandler extends () => void>(handler: THandler): THandler;
-// 	abstract whenExiting<THandler extends () => Promise<void>>(handler: THandler): THandler;
-// 	abstract whenExited<THandler extends () => void>(handler: THandler): THandler;
-
-// 	abstract handler<THandler extends () => Promise<void>>(handler: THandler): THandler;
-// }
-
-// function createModal(factory: (factory: PortalBuilder) => Promise<void>) {
-
-// }
-
-// const MyModal = createModal(async _ => {
-// 	// dependencies
-// 	const router = _.dependency(RouterTag);
-
-// 	// initial state
-// 	let state = _.state({
-// 		loaded: false,
-// 		transitions: router.pendingTransitions,
-// 	});
-
-// 	// lifecycle
-// 	_.whenEntered(async () => {
-// 		await delay(1000);
-
-// 		state.loaded = true;
-// 	});
-
-// 	// handlers
-// 	const handleTableChange = _.handler(async () => {
-		
-// 	});
-
-// 	// templates
-// 	_.view('', () => {
-// 		if (!state.loaded) {
-// 			return <div>Loading..</div>;
-// 		}
-
-// 		return <div>This is my modal!</div>;
-// 	});
-// });

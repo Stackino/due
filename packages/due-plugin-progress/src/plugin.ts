@@ -1,18 +1,15 @@
-import { Container, Plugin, RouterTag, Transition } from '@stackino/due';
+import { Container, Plugin, RouterTag, Transition } from '@stackino/due-core';
 import { reaction, IReactionDisposer, comparer } from 'mobx';
 
 const topbar = require('topbar');
 
-export class ProgressPlugin implements Plugin {
-	configureServices(container: Container): void {
-
-	}
+export class ProgressPlugin extends Plugin {
 
 	private subscription: IReactionDisposer | null = null;
 	private running: boolean = false;
 	private visible: boolean = false;
 
-	start(services: Container): Promise<void> {
+	onStarting(services: Container) {
 		if (this.running) {
 			throw new Error('Attempt to start running progress plugin');
 		}
@@ -45,11 +42,9 @@ export class ProgressPlugin implements Plugin {
 				equals: comparer.structural,
 			}
 		);
-
-		return Promise.resolve();
 	}
 
-	stop(): Promise<void> {
+	onStopping() {
 		if (!this.running) {
 			throw new Error('Attempt to stop stopped progress plugin');
 		}

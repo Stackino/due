@@ -19,10 +19,15 @@ function configure(): webpack.Configuration {
         resolve: {
 			extensions: ['.tsx', '.ts', '.js'],
         },
-        externals: {
-            'mobx': 'mobx',
-            'tslib': 'tslib'
-        },
+        externals: [
+            function (context: string, request: string, callback: (error?: unknown, result?: string | null) => void): void {
+                if (request.startsWith('.')) {
+                    callback();
+                } else {
+                    callback(null, request);
+                }
+            },
+        ],
     };
 
     return configuration;

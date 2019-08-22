@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due",
-  "version": "0.0.20",
+  "version": "0.1.2",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",
@@ -16,10 +16,11 @@
     "prepublishOnly": "yarn run build:prod"
   },
   "dependencies": {
-    "classnames": "^2.2.6",
-    "path-parser": "^4.2.0",
-    "tslib": "^1.10.0",
-    "ua-parser-js": "^0.7.20"
+    "@stackino/due-core": "0.1.x",
+    "@stackino/due-plugin-progress": "0.1.x",
+    "@stackino/due-plugin-react": "0.1.x",
+    "@stackino/due-plugin-router5": "0.1.x",
+    "tslib": "^1.10.0"
   },
   "peerDependencies": {
     "inversify": "^5.0.0",
@@ -27,20 +28,21 @@
     "reflect-metadata": "^0.1.0"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.15",
+    "@types/jest": "^24.0.18",
     "@types/ua-parser-js": "^0.7.33",
-    "@types/webpack": "^4.4.34",
-    "@types/webpack-env": "^1.13.9",
-    "@typescript-eslint/eslint-plugin": "^1.11.0",
-    "@typescript-eslint/parser": "^1.11.0",
-    "eslint": "^6.0.1",
+    "@types/webpack": "^4.39.0",
+    "@types/webpack-env": "^1.14.0",
+    "@typescript-eslint/eslint-plugin": "^2.0.0",
+    "@typescript-eslint/parser": "^2.0.0",
+    "eslint": "^6.2.1",
     "eslint-loader": "^2.2.1",
-    "jest": "^24.8.0",
+    "jest": "^24.9.0",
     "ts-jest": "^24.0.2",
     "ts-loader": "^6.0.4",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.3",
-    "webpack": "^4.35.3",
-    "webpack-cli": "^3.3.5"
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.7",
+    "webpack-node-externals": "^1.7.2"
   }
 }

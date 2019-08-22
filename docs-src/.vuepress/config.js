@@ -1,14 +1,15 @@
 module.exports = {
     title: 'Stackino Due',
     base: '/due/',
-    description: 'Opinionated React framework.',
+    description: 'Opinionated web application framework.',
     themeConfig: {
         sidebar: [
             {
                 title: 'Guide',
                 collapsable: false,
                 children: [
-                    '/guide/'
+                    '/guide/',
+                    '/guide/minimal-application'
                 ]
             }
         ]

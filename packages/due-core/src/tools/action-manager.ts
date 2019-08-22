@@ -37,11 +37,11 @@ function isAsyncIterableIterator<T>(obj: T): obj is Extract<T, AsyncIterableIter
 }
 
 export function action<TSelf, TFlow extends Flow<TSelf>>(self: TSelf, action: TFlow): Action<TSelf, TFlow> {
-	let runningAtom = createAtom('Action \'running\'');
+	const runningAtom = createAtom('Action \'running\'');
 	let runningCounter = 0;
 	let idCounter = 0;
 
-	let run = async function (...args: unknown[]): Promise<void> {
+	const run = async function (...args: unknown[]): Promise<void> {
 		const id = ++idCounter;
 
 		try {
@@ -137,7 +137,7 @@ export function action<TSelf, TFlow extends Flow<TSelf>>(self: TSelf, action: TF
 		}
 	};
 
-	let fn = function (...args: unknown[]): void {
+	const fn = function (...args: unknown[]): void {
 		run(...args);
 	};
 

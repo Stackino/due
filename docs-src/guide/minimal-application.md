@@ -1,0 +1,3 @@
+# Minimal application
+
+<iframe src="https://codesandbox.io/embed/stackino-due-hello-world-bxfv4?fontsize=12&codemirror=1&module=/src/index.tsx,/src/pages/home.tsx&view=split" title="stackino-due-hello-world" allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media; usb" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>

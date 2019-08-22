@@ -2,7 +2,7 @@ import * as React from 'react';
 import { observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useDependency } from './render-service';
-import { ContainerTag } from '@stackino/due';
+import { ContainerTag } from '@stackino/due-core';
 
 export abstract class ReactComponent<TProps> {
 	constructor(props: TProps) {

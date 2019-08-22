@@ -258,13 +258,13 @@ export class DefaultRouter implements Router {
 		this.portalLifecycles.set(lifecycle.instance, lifecycle);
 
 		const nextPortals: Portal<unknown, unknown>[] = [];
-		nextPortals.push.apply(nextPortals, this.portals);
+		nextPortals.push(...this.portals);
 		nextPortals.push(lifecycle.instance);
 		this.portalsValue.set(nextPortals);
 
 		lifecycle.finished.then(() => {
 			const nextPortals: Portal<unknown, unknown>[] = [];
-			nextPortals.push.apply(nextPortals, this.portals);
+			nextPortals.push(...this.portals);
 			const index = nextPortals.indexOf(lifecycle.instance);
 			if (index !== -1) {
 				nextPortals.splice(index, 1);

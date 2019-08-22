@@ -1,4 +1,4 @@
-import { Constructed, DefaultContainer, ContainerTag, inject, injectable, RouteRegistry, pathCombine, Route, Router, RouterHandler, RouterHandlerFactory, RouterHandlerFactoryTag, RouteRegistryTag, RouterTag, Transition, TransitionController } from '@stackino/due';
+import { Constructed, DefaultContainer, ContainerTag, inject, injectable, RouteRegistry, pathCombine, Route, Router, RouterHandler, RouterHandlerFactory, RouterHandlerFactoryTag, RouteRegistryTag, RouterTag, Transition, TransitionController } from '@stackino/due-core';
 import { createRouter as createRouter5, Dependencies as Dependencies5, NavigationOptions as NavigationOptions5, Plugin as Plugin5, Route as Route5, Router as Router5, State as State5 } from 'router5';
 import browserPlugin from 'router5-plugin-browser';
 import { Params as Params5 } from 'router5/types/types/base';
@@ -54,7 +54,7 @@ export class Router5RouterHandler implements RouterHandler {
 		this.router5.usePlugin((router?: Router5, dependencies?: Dependencies5): Plugin5 => {
 			return {
 				onStart(): void {
-
+					void 0;
 				},
 				onTransitionStart: (toState?: State5, fromState?: State5): void => {
 					if (!toState) {
@@ -138,10 +138,10 @@ export class Router5RouterHandler implements RouterHandler {
 					console.groupEnd();
 				},
 				onStop(): void {
-
+					void 0;
 				},
 				teardown(): void {
-
+					void 0;
 				}
 			};
 		});
@@ -203,7 +203,7 @@ export class Router5RouterHandlerFactory implements RouterHandlerFactory {
 		const route5s: Route5[] = [];
 		
 		for (const route of this.routeRegistry.root.descendants) {
-			let name = route.name;
+			const name = route.name;
 			let path = route.path;
 
 			if (!name || !path) {

@@ -2,31 +2,30 @@ import 'jest';
 import 'reflect-metadata';
 import { RouteBuilder } from '../../src/routing/route-builder';
 import { TransitionController, TransitionStatus } from '../../src/routing/transition';
-import { RootRouteDeclaration, RootPage, Routable, DefaultRouteRegistry, DefaultContainer, DiagnosticsServiceTag, DefaultDiagnosticsService, BindingScope, ContainerTag, RouteRegistry, Container } from '../../src';
+import { RootRouteDeclaration, RootPage, Routable, Route, DefaultRouteRegistry, DefaultContainer, DiagnosticsServiceTag, DefaultDiagnosticsService, BindingScope, ContainerTag, RouteRegistry, Container, LayoutRouteDeclaration, PageRouteDeclaration } from '../../src';
 
-class MockRoutable implements Routable {
-    enter: undefined;
+class MockRoutable extends Routable {
 }
 
 async function setup(): Promise<[Container, RouteRegistry]> {
     const rootRoute: RootRouteDeclaration = new RootRouteDeclaration(
         () => RootPage,
-        () => new RouteBuilder()
+        (parent) => new RouteBuilder()
             // sign-in page
             .page('sign-in', '/sign-in', () => MockRoutable)
             // public facing page with all products from all tenants
-            .layout('products', '/products', () => MockRoutable, () => productsBuilder => productsBuilder
+            .layout('products', '/products', () => MockRoutable, productsBuilder => productsBuilder
                 .page('list', '/', () => MockRoutable)
                 .page('detail', '/:productId', () => MockRoutable)
             )
             // product management per tenant
-            .layout('portal', '/portal/:tenantId', () => MockRoutable, () => portalBuilder => portalBuilder
-                .layout('products', '/products', () => MockRoutable, () => productsBuilder => productsBuilder
+            .layout('portal', '/portal/:tenantId', () => MockRoutable, portalBuilder => portalBuilder
+                .layout('products', '/products', () => MockRoutable, productsBuilder => productsBuilder
                     .page('list', '/', () => MockRoutable)
                     .page('detail', '/:productId', () => MockRoutable)
                 )
             )
-            .build(rootRoute)
+            .build(parent)
     );
 
     const container = new DefaultContainer();
@@ -39,6 +38,24 @@ async function setup(): Promise<[Container, RouteRegistry]> {
 
     return [container, registry];
 }
+
+test('parents are set properly', async () => {
+    const [container, registry] = await setup();
+
+    function verifyParents(route: Route) {
+        for (const child of route.children) {
+            expect(child.parent).toBe(route);
+
+            if (child.declaration instanceof LayoutRouteDeclaration || child.declaration instanceof PageRouteDeclaration) {
+                expect(child.declaration.parent).toBe(route.declaration);
+            }
+
+            verifyParents(child);
+        }
+    }
+
+    verifyParents(registry.root);
+});
 
 test('transition intersection', async () => {
     const [container, registry] = await setup();

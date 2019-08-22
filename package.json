@@ -6,20 +6,22 @@
         "build:prod": "yarn workspaces run build:prod",
         "docs:dev": "vuepress dev ./docs-src",
         "docs:prod": "vuepress build ./docs-src --dest ./docs",
+        "publish": "yarn workspaces run publish --patch --no-git-tag-version --access=public",
         "test": "yarn workspaces run test"
     },
     "workspaces": [
-        "packages/due",
+        "packages/due-core",
         "packages/due-plugin-progress",
         "packages/due-plugin-react",
-        "packages/due-plugin-router5"
+        "packages/due-plugin-router5",
+        "packages/due"
     ],
     "devDependencies": {
         "inversify": "^5.0.1",
-        "mobx": "^5.11.0",
+        "mobx": "^5.13.0",
         "mobx-react-lite": "^1.4.1",
-        "react": "^16.8.6",
-        "react-dom": "^16.8.6",
+        "react": "^16.9.0",
+        "react-dom": "^16.9.0",
         "reflect-metadata": "^0.1.13"
     }
 }

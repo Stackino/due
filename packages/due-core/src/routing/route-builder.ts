@@ -4,16 +4,34 @@ import { RouteDeclaration, LayoutRouteDeclaration, PageRouteDeclaration } from '
 
 export type BuildRouteDelegate = (builder: RouteBuilder) => void;
 
+// interface RoutedPage {
+// 	name: string;
+// 	url: string;
+// 	page: Provider<Newable<Routable>>;
+// }
+
+// interface RoutedLayout {
+// 	name?: string | null;
+// 	url?: string | null;
+// 	page?: Provider<Newable<Routable>>;
+// 	children: Routed[];
+// }
+
+// function isRoutedLayout(routed: Routed): routed is RoutedLayout {
+// 	return !!(routed as any).children;
+// }
+
+// type Routed = RoutedPage | RoutedLayout;
+
 export class RouteBuilder {
 	readonly actions: ((parent: RouteDeclaration) => RouteDeclaration)[] = [];
 
-	layout(name: string | null, url: string | null, page: Provider<Newable<Routable>>, children: Provider<BuildRouteDelegate>): RouteBuilder {
-		this.actions.push(parent => new LayoutRouteDeclaration(name, url, page, parent, async () => {
+	layout(name: string | null, url: string | null, page: Provider<Newable<Routable>>, children: BuildRouteDelegate): RouteBuilder {
+		this.actions.push(parent => {
 			const childrenBuilder = new RouteBuilder();
-			(await executeProvider(children))(childrenBuilder);
-
-			return childrenBuilder.build(parent);
-		}));
+			children(childrenBuilder);
+			return new LayoutRouteDeclaration(name, url, page, parent, (parent) => childrenBuilder.build(parent));
+		});
 
 		return this;
 	}

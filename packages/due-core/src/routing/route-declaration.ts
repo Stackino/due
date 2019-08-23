@@ -12,7 +12,7 @@ export class RouteDeclaration {
 	 * @param path Relative path to parent route.
 	 * @param page Page attached to this route.
 	 */
-	constructor(name: string | null, path: string | null, page: Provider<Newable<Routable>>) {
+	constructor(name: string | null, path: string | null, page: Provider<Newable<Routable>> | null) {
 		if (name && !validRouteNameRegex.test(name)) {
 			throw new Error(`Route name '${name}' contains invalid characters`);
 		}
@@ -24,7 +24,7 @@ export class RouteDeclaration {
 
 	public readonly name: string | null;
 	public readonly path: string | null;
-	public readonly page: Provider<Newable<Routable>>;
+	public readonly page: Provider<Newable<Routable>> | null;
 }
 
 /**
@@ -51,7 +51,7 @@ export class RootRouteDeclaration extends RouteDeclaration {
  * Layout route is a branch in the route tree - it must contains at least one child route.
  */
 export class LayoutRouteDeclaration extends RouteDeclaration implements ChildRouteDeclaration {
-	constructor(name: string | null, url: string | null, page: Provider<Newable<Routable>>, parent: RouteDeclaration, children: (parent: RouteDeclaration) => RouteDeclaration[]) {
+	constructor(name: string | null, url: string | null, page: Provider<Newable<Routable>> | null, parent: RouteDeclaration, children: (parent: RouteDeclaration) => RouteDeclaration[]) {
 		super(name, url, page);
 
 		this.parent = parent;

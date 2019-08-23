@@ -5,3 +5,6 @@ export abstract class Routable {
 	retain?(transition: Transition): Promise<void | (() => void)>;
 	exit?(transition: Transition): Promise<void | (() => void)>;
 }
+
+export class NoopRoutable extends Routable {
+}

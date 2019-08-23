@@ -14,15 +14,15 @@ async function setup(): Promise<[Container, RouteRegistry]> {
             // sign-in page
             .page('sign-in', '/sign-in', () => MockRoutable)
             // public facing page with all products from all tenants
-            .layout('products', '/products', () => MockRoutable, productsBuilder => productsBuilder
+            .layout('products', '/products', () => MockRoutable, builder => builder
                 .page('list', '/', () => MockRoutable)
                 .page('detail', '/:productId', () => MockRoutable)
             )
-            // product management per tenant
-            .layout('portal', '/portal/:tenantId', () => MockRoutable, portalBuilder => portalBuilder
-                .layout('products', '/products', () => MockRoutable, productsBuilder => productsBuilder
-                    .page('list', '/', () => MockRoutable)
-                    .page('detail', '/:productId', () => MockRoutable)
+            // product management per tenant (alternative syntaxe)
+            .layout({ name: 'portal', url: '/portal/:tenantId', page: () => MockRoutable }, builder => builder
+                .layout({ name: 'products', url: '/products', page: () => MockRoutable }, builder => builder
+                    .page({ name: 'list', url: '/', page: () => MockRoutable })
+                    .page({ name: 'detail', url: '/:productId', page: () => MockRoutable })
                 )
             )
             .build(parent)

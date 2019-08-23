@@ -9,7 +9,8 @@ module.exports = {
                 collapsable: false,
                 children: [
                     '/guide/',
-                    '/guide/minimal-application'
+                    '/guide/minimal-application',
+                    '/guide/adding-pages'
                 ]
             }
         ]

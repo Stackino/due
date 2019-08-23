@@ -29,6 +29,8 @@ function normalizeParams(params?: ReadonlyMap<string, string> | { [key: string]:
 }
 
 export interface LinkProps {
+	variant?: 'a' |'li + a';
+
 	to: string;
 	params?: ReadonlyMap<string, string> | { [key: string]: unknown };
 	activeName?: string;
@@ -40,7 +42,7 @@ export interface LinkProps {
 	activeClassName?: string;
 }
 
-export const Link: React.FunctionComponent<LinkProps> = observer(({ to, params, activeName, activeParams, id, style, className, activeClassName, children }) => {
+export const Link: React.FunctionComponent<LinkProps> = observer(({ variant = 'a', to, params, activeName, activeParams, id, style, className, activeClassName = 'active', children }) => {
 	const router = useDependency(RouterTag);
 	const handleClick = React.useCallback((event: React.MouseEvent) => {
 		event.preventDefault();
@@ -49,11 +51,23 @@ export const Link: React.FunctionComponent<LinkProps> = observer(({ to, params, 
 		router.goToName(to, normalizeParams(params));
 	}, [router, to, params]);
 
-	return <a
-		href={router.pathForName(to, normalizeParams(params))} onClick={handleClick}
-		id={id} className={classNames(className, router.isActiveName(activeName || to, normalizeParams(activeParams || params)) && activeClassName)} style={style}
-	>{children}</a>;
+	const href = router.pathForName(to, normalizeParams(params));
+	const isActive = router.isActiveName(activeName || to, normalizeParams(activeParams || params));
+	const computedClassName = classNames(className, isActive && activeClassName);
+
+	if (variant === 'a') {
+		return <a
+			href={href} onClick={handleClick}
+			id={id} className={computedClassName} style={style}
+		>{children}</a>;
+	} else if (variant === 'li + a') {
+		return <li onClick={handleClick} className={computedClassName}>
+			<a
+				href={href} onClick={handleClick}
+				id={id} style={style}
+			>{children}</a>
+		</li>;
+	} else {
+		throw new Error(`Invalid link variant '${variant}'`);
+	}
 });
-Link.defaultProps = {
-	activeClassName: 'active',
-};

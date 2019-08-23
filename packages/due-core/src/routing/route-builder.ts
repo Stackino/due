@@ -1,26 +1,26 @@
 import { Provider, Newable, executeProvider, isStringOrNull, isFunctionOrNull, isFunction, isObjectOrNull, isObject, isString } from '../tools';
 import { Routable } from './routable';
-import { RouteDeclaration, LayoutRouteDeclaration, PageRouteDeclaration } from './route-declaration';
+import { RouteDeclaration, LayoutRouteDeclaration, PageRouteDeclaration, PageProvider } from './route-declaration';
 
 export type BuildRouteDelegate = (builder: RouteBuilder) => void;
 
 interface RoutedPage {
 	name: string;
 	url: string;
-	page: Provider<Newable<Routable>>;
+	page: PageProvider;
 }
 
 interface RoutedLayout {
 	name?: string | null;
 	url?: string | null;
-	page?: Provider<Newable<Routable>>;
+	page?: PageProvider;
 }
 
 export class RouteBuilder {
 	readonly actions: ((parent: RouteDeclaration) => RouteDeclaration)[] = [];
 
 	layout(config: RoutedLayout, children: BuildRouteDelegate): RouteBuilder;
-	layout(name: string | null, url: string | null, page: Provider<Newable<Routable>> | null, children: BuildRouteDelegate): RouteBuilder;
+	layout(name: string | null, url: string | null, page: PageProvider | null, children: BuildRouteDelegate): RouteBuilder;
 	layout(...args: unknown[]): RouteBuilder {
 		if (args.length === 2) {
 			const [config, children] = args;
@@ -40,7 +40,7 @@ export class RouteBuilder {
 			if (!isStringOrNull(url)) {
 				throw new Error('Route url must be a string or null');
 			}
-			if (!isFunctionOrNull<Provider<Newable<Routable>>>(page)) {
+			if (!isFunctionOrNull<PageProvider>(page)) {
 				throw new Error('Route page must be a function or null');
 			}
 			if (!isFunction<BuildRouteDelegate>(children)) {
@@ -58,7 +58,7 @@ export class RouteBuilder {
 	}
 
 	page(config: RoutedPage): RouteBuilder;
-	page(name: string, url: string, page: Provider<Newable<Routable>>): RouteBuilder;
+	page(name: string, url: string, page: PageProvider): RouteBuilder;
 	page(...args: unknown[]): RouteBuilder {
 		if (args.length === 1) {
 			const [config] = args;
@@ -75,7 +75,7 @@ export class RouteBuilder {
 			if (!isString(url)) {
 				throw new Error('Route url must be a string');
 			}
-			if (!isFunction<Provider<Newable<Routable>>>(page)) {
+			if (!isFunction<PageProvider>(page)) {
 				throw new Error('Route page must be a function');
 			}
 			

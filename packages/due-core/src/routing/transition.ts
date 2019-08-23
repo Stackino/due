@@ -1,7 +1,7 @@
 import { State } from './state';
 import { Route } from './route';
-import { NoopRoutable } from './routable';
-import { PromiseCompletitionSource, executeProvider } from '../tools';
+import { NoopRoutable, Routable } from './routable';
+import { PromiseCompletitionSource, executeProvider, Newable } from '../tools';
 import { Container, inject, ContainerTag } from '../ioc';
 import { DiagnosticsServiceTag, DiagnosticsService } from '../diagnostics';
 
@@ -47,7 +47,18 @@ export class TransitionController implements Transition {
 	}
 
 	private async createEnteringState(route: Route): Promise<State> {
-		const Page = route.declaration.page ? await executeProvider(route.declaration.page) : NoopRoutable;
+		let Page: Newable<Routable>;
+		if (route.declaration.page) {
+			const pageOrModule = await executeProvider(route.declaration.page);
+
+			if (typeof pageOrModule === 'object') {
+				Page = pageOrModule.default;
+			} else {
+				Page = pageOrModule;
+			}
+		} else {
+			Page = NoopRoutable;
+		}
 
 		const page = new Page();
 		this.container.inject(page);

@@ -5,14 +5,20 @@ module.exports = {
     themeConfig: {
         sidebar: [
             {
-                title: 'Guide',
+                title: 'Basics',
                 collapsable: false,
                 children: [
-                    '/guide/',
-                    '/guide/minimal-application',
-                    '/guide/adding-pages'
-                ]
-            }
-        ]
-    }
-}
+                    '/basics/installation',
+                ],
+            },
+            {
+                title: 'Getting started',
+                collapsable: false,
+                children: [
+                    '/getting-started/1-minimal-application',
+                    '/getting-started/2-adding-pages',
+                ],
+            },
+        ],
+    },
+};

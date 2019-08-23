@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due-plugin-router5",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",

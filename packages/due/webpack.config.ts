@@ -7,7 +7,7 @@ function configure(): webpack.Configuration {
         output: {
             path: path.resolve(__dirname, 'dist'),
             filename: 'index.js',
-            library: 'stackino_due',
+            library: 'stackino_due_core',
             libraryTarget: 'umd'
         },
         module: {

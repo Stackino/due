@@ -1,6 +1,6 @@
 {
-  "name": "@stackino/due-core",
-  "version": "0.1.4",
+  "name": "@stackino/due-preset-react",
+  "version": "0.1.12",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",
@@ -16,10 +16,11 @@
     "prepublishOnly": "yarn run build:prod"
   },
   "dependencies": {
-    "classnames": "^2.2.6",
-    "path-parser": "^4.2.0",
-    "tslib": "^1.10.0",
-    "ua-parser-js": "^0.7.20"
+    "@stackino/due": "0.1.x",
+    "@stackino/due-plugin-progress": "0.1.x",
+    "@stackino/due-plugin-react": "0.1.x",
+    "@stackino/due-plugin-router5": "0.1.x",
+    "tslib": "^1.10.0"
   },
   "peerDependencies": {
     "inversify": "^5.0.0",
@@ -41,6 +42,7 @@
     "ts-node": "^8.3.0",
     "typescript": "^3.5.3",
     "webpack": "^4.39.2",
-    "webpack-cli": "^3.3.7"
+    "webpack-cli": "^3.3.7",
+    "webpack-node-externals": "^1.7.2"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due-plugin-progress",
-  "version": "0.1.4",
+  "version": "0.1.12",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",
@@ -19,7 +19,7 @@
     "topbar": "^0.1.3"
   },
   "peerDependencies": {
-    "@stackino/due-core": "0.1.x"
+    "@stackino/due": "0.1.x"
   },
   "devDependencies": {
     "@types/jest": "^24.0.18",

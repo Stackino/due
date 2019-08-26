@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { useDependency } from './render-service';
-import { ContainerTag } from '@stackino/due-core';
+import { useDependency } from './hooks';
+import { ContainerTag } from '@stackino/due';
+import { createObservedTemplate } from './internal/tools';
 
 export abstract class ReactComponent<TProps> {
 	constructor(props: TProps) {
@@ -18,6 +19,11 @@ export abstract class ReactComponent<TProps> {
 }
 
 export function connectReactComponent<TReactComponent extends ReactComponent<TProps>, TProps>(reactComponent: new (props: TProps) => TReactComponent): React.FunctionComponent<TProps> {
+	let underlyingName = reactComponent.name || 'Anonymous template';
+	if (underlyingName.endsWith('Component')) {
+		underlyingName = underlyingName.substr(0, underlyingName.length - 9);
+	}
+
 	const connector: React.FunctionComponent<TProps> = (props: TProps) => {
 		const container = useDependency(ContainerTag);
 		const instanceRef = React.useRef<TReactComponent | null>(null);
@@ -27,14 +33,15 @@ export function connectReactComponent<TReactComponent extends ReactComponent<TPr
 		if (!instance) {
 			instance = new reactComponent(props);
 
-			if (!instance.template.displayName && reactComponent.name) {
-				instance.template.displayName = reactComponent.name;
+			if (!instance.template.displayName) {
+				instance.template.displayName = underlyingName;
 			}
 
-			instance.template = observer(instance.template);
 			container.inject(instance);
 			instanceRef.current = instance;
 		}
+
+		const ObservedComponent = createObservedTemplate('ReactComponent', instance.template);
 
 		runInAction(() => {
 			if (instance!.onUpdate) {
@@ -43,12 +50,11 @@ export function connectReactComponent<TReactComponent extends ReactComponent<TPr
 			instance!.props = props;
 		});
 
-		const Component = instance.template;
-		return <Component />;
+		return <ObservedComponent />;
 	};
 
 	if (!connector.displayName && reactComponent.name) {
-		connector.displayName = `connectReactComponent(${reactComponent.name})`;
+		connector.displayName = `ReactComponentConnector(${underlyingName})`;
 	}
 
 	return connector;

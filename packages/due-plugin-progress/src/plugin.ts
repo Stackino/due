@@ -1,4 +1,4 @@
-import { Container, Plugin, RouterTag, Transition } from '@stackino/due-core';
+import { Container, Plugin, RouterTag, Transition } from '@stackino/due';
 import { reaction, IReactionDisposer, comparer } from 'mobx';
 
 const topbar = require('topbar');

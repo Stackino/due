@@ -1,4 +1,4 @@
-import { BindingScope, DefaultContainer, Plugin, RenderServiceTag } from '@stackino/due-core';
+import { BindingScope, DefaultContainer, Plugin, RenderServiceTag } from '@stackino/due';
 import { ReactRenderService, ReactRenderServiceOptions, ReactRenderServiceOptionsTag } from './render-service';
 
 export interface ReactPluginOptions {

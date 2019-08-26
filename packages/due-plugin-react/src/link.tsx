@@ -1,7 +1,7 @@
-import { RouterTag } from '@stackino/due-core';
+import { RouterTag } from '@stackino/due';
 import * as classNames from 'classnames';
 import * as React from 'react';
-import { useDependency } from './render-service';
+import { useDependency } from './hooks';
 import { observer } from 'mobx-react-lite';
 
 function normalizeParams(params?: ReadonlyMap<string, string> | { [key: string]: unknown } | undefined): Map<string, string> | undefined {
@@ -29,7 +29,7 @@ function normalizeParams(params?: ReadonlyMap<string, string> | { [key: string]:
 }
 
 export interface LinkProps {
-	variant?: 'a' |'li + a';
+	variant?: 'a' | 'li + a';
 
 	to: string;
 	params?: ReadonlyMap<string, string> | { [key: string]: unknown };
@@ -42,7 +42,7 @@ export interface LinkProps {
 	activeClassName?: string;
 }
 
-export const Link: React.FunctionComponent<LinkProps> = observer(({ variant = 'a', to, params, activeName, activeParams, id, style, className, activeClassName = 'active', children }) => {
+export const Link: React.FunctionComponent<LinkProps> = observer(function ({ variant = 'a', to, params, activeName, activeParams, id, style, className, activeClassName = 'active', children }) {
 	const router = useDependency(RouterTag);
 	const handleClick = React.useCallback((event: React.MouseEvent) => {
 		event.preventDefault();
@@ -71,3 +71,4 @@ export const Link: React.FunctionComponent<LinkProps> = observer(({ variant = 'a
 		throw new Error(`Invalid link variant '${variant}'`);
 	}
 });
+Link.displayName = 'Link';

@@ -1,4 +1,4 @@
-import { Constructed, DefaultContainer, ContainerTag, inject, injectable, RouteRegistry, pathCombine, Route, Router, RouterHandler, RouterHandlerFactory, RouterHandlerFactoryTag, RouteRegistryTag, RouterTag, Transition, TransitionController } from '@stackino/due-core';
+import { Constructed, DefaultContainer, ContainerTag, inject, injectable, RouteRegistry, pathCombine, Route, Router, RouterHandler, RouterHandlerFactory, RouterHandlerFactoryTag, RouteRegistryTag, RouterTag, Transition, TransitionController } from '@stackino/due';
 import { createRouter as createRouter5, Dependencies as Dependencies5, NavigationOptions as NavigationOptions5, Plugin as Plugin5, Route as Route5, Router as Router5, State as State5 } from 'router5';
 import browserPlugin from 'router5-plugin-browser';
 import { Params as Params5 } from 'router5/types/types/base';
@@ -71,10 +71,7 @@ export class Router5RouterHandler implements RouterHandler {
 						toName = this.aliasToName.get(toState.name) || toState.name;
 					}
 
-					console.groupCollapsed(`Transition ${fromName ? fromName : 'n/a'} => ${toName} - creating`);
-					console.log('previous route ', fromState);
-					console.log('current route  ', toState);
-					console.groupEnd();
+					console.log(`Transition ${fromName ? fromName : 'n/a'} => ${toName} - creating`);
 
 					const transition = this.router.createTransitionToName(this.router.activeTransition, toName, params5ToParams(toState.params));
 
@@ -94,10 +91,7 @@ export class Router5RouterHandler implements RouterHandler {
 
 					transition.suppress();
 
-					console.groupCollapsed(`Transition ${transition.from ? transition.from.to.name : 'n/a'} => ${transition.to.name} - suppressed`);
-					console.log('previous route ', fromState);
-					console.log('current route  ', toState);
-					console.groupEnd();
+					console.log(`Transition ${transition.from ? transition.from.to.name : 'n/a'} => ${transition.to.name} - suppressed`);
 				},
 				onTransitionError(toState?: State5, fromState?: State5, err?: any): void {
 					if (!toState) {
@@ -113,10 +107,7 @@ export class Router5RouterHandler implements RouterHandler {
 
 					transition.fail(err);
 
-					console.groupCollapsed(`Transition ${transition.from ? transition.from.to.name : 'n/a'} => ${transition.to.name} - failed`);
-					console.log('previous route ', fromState);
-					console.log('current route  ', toState);
-					console.groupEnd();
+					console.log(`Transition ${transition.from ? transition.from.to.name : 'n/a'} => ${transition.to.name} - failed`);
 				},
 				onTransitionSuccess: (toState?: State5, fromState?: State5, opts?: NavigationOptions5): void => {
 					if (!toState) {
@@ -132,10 +123,7 @@ export class Router5RouterHandler implements RouterHandler {
 
 					transition.finish();
 
-					console.groupCollapsed(`Transition ${transition.from ? transition.from.to.name : 'n/a'} => ${transition.to.name} - success`);
-					console.log('previous route ', fromState);
-					console.log('current route  ', toState);
-					console.groupEnd();
+					console.log(`Transition ${transition.from ? transition.from.to.name : 'n/a'} => ${transition.to.name} - success`);
 				},
 				onStop(): void {
 					void 0;

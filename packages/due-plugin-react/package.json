@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due-plugin-react",
-  "version": "0.1.4",
+  "version": "0.1.12",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",
@@ -20,7 +20,7 @@
     "core-decorators": "^0.20.0"
   },
   "peerDependencies": {
-    "@stackino/due-core": "0.1.x",
+    "@stackino/due": "0.1.x",
     "mobx-react-lite": "^1.2.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0"

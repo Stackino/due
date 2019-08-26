@@ -1,6 +1,7 @@
-export * from '@stackino/due-core';
-export * from '@stackino/due-plugin-progress';
-export * from '@stackino/due-plugin-react';
-export * from '@stackino/due-plugin-router5';
-
 export * from './application';
+export * from './diagnostics';
+export * from './ioc';
+export * from './plugin';
+export * from './rendering';
+export * from './routing';
+export * from './tools';

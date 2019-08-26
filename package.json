@@ -10,11 +10,11 @@
         "test": "yarn workspaces run test"
     },
     "workspaces": [
-        "packages/due-core",
+        "packages/due",
         "packages/due-plugin-progress",
         "packages/due-plugin-react",
         "packages/due-plugin-router5",
-        "packages/due"
+        "packages/due-preset-react"
     ],
     "devDependencies": {
         "inversify": "^5.0.1",

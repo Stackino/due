@@ -10,8 +10,15 @@ import { createObservedTemplate } from './internal/tools';
 function createPageElement(pageContext: PageContext): React.ReactElement<any> {
 	const currentState = pageContext.transition.active[pageContext.index];
 
-	// todo: sanity checks and warnings for accessing `page` and `component`
-	const Component = (currentState.page as ReactPage).template;
+	const page = currentState.page as ReactPage;
+
+	// hack: convert `Routable` to `ReactPage`
+	if (!page.template) {
+		page.template = () => <View />;
+	}
+
+	const Component = page.template;
+
 	if (!Component.displayName) {
 		Component.displayName = `${currentState.route.id}`;
 	}
@@ -49,6 +56,11 @@ function createPortalElements(container: Container, roots: Map<Portal<unknown, u
 		}
 
 		const Component = (portal as ReactPortal<unknown, unknown>).template;
+
+		if (!Component) {
+			throw new Error('Portal doesn\'t have template');
+		}
+		
 		if (!Component.displayName) {
 			Component.displayName = `${portal.constructor.name}`;
 		}

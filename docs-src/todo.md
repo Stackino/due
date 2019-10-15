@@ -19,3 +19,6 @@
     * Usage in pages
     * Usage in portals
     * Usage in react components
+
+
+ * error when redirecting from layout to children (possible infinite loop)

@@ -1,4 +1,6 @@
-import { Container, PromiseCompletitionSource } from '..';
+import { Container } from '../ioc';
+import { Composable } from '../composition';
+import { PromiseCompletitionSource } from '../tools';
 import { observable, when } from 'mobx';
 
 export class PortalLifecycle {
@@ -7,11 +9,8 @@ export class PortalLifecycle {
 		portalClass: new (controller: PortalController<unknown, unknown>) => Portal<unknown, unknown>,
 		private input: unknown
 	) {
-		this.controller = new PortalController(this, input);
-		container.inject(this.controller);
-
-		this.instance = new portalClass(this.controller);
-		container.inject(this.instance);
+		this.controller = container.instantiate(PortalController, this, input);
+		this.instance = container.instantiate(portalClass, this.controller);
 	}
 
 	readonly controller: PortalController<unknown, unknown>;
@@ -115,8 +114,10 @@ export class PortalController<TInput, TOutput> {
 	}
 }
 
-export abstract class Portal<TInput, TOutput> {
+export abstract class Portal<TInput, TOutput> extends Composable {
 	constructor(controller: PortalController<TInput, TOutput>) {
+		super();
+
 		this.controller = controller;
 	}
 

@@ -3,8 +3,7 @@ import { Portal, Transition, Routable } from '../routing';
 
 export const RenderServiceTag = new Tag<RenderService>('Stackino render service');
 
-export class RootPage implements Routable {
-	enter = undefined;
+export class RootPage extends Routable {
 }
 
 export interface RenderService {

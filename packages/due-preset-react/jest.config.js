@@ -7,6 +7,8 @@ module.exports = {
       diagnostics: {
         ignoreCodes: ['TS151001']
       }
-    }
+    },
+    'window': {},
+    'document': {}
   }
 };

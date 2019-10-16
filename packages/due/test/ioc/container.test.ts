@@ -1,6 +1,6 @@
 import 'jest';
 import 'reflect-metadata';
-import { injectable, Tag, inject, DefaultContainer, BindingScope } from '../../src';
+import { injectable, Tag, inject, DefaultContainer, BindingScope, Injectable } from '../../src';
 
 const Dependency1Tag = new Tag<Dependency1>('Test dependency 1');
 
@@ -22,18 +22,32 @@ class Consumer extends ConsumerBase {
     public dependency2!: Dependency2;
 }
 
-test('resolves class hierarchy', async () => {
+class ObjectConsumerBase extends Injectable {
+    public dependency1 = this.$dependency(Dependency1Tag);
+}
+
+class ObjectConsumer extends Injectable {
+    public dependency2 = this.$dependency(Dependency2Tag);
+}
+
+test('decorators: resolves class hierarchy', async () => {
     const container = new DefaultContainer();
     container.bind(Dependency1Tag, Dependency1, BindingScope.singleton);
     container.bind(Dependency2Tag, Dependency2, BindingScope.singleton);
 
-    const a = Reflect.getMetadata('stackino:ioc:inject-properties', Consumer);
-
     const consumer = new Consumer();
-
-    const b = Reflect.getMetadata('stackino:ioc:inject-properties', consumer);
-
     container.inject(consumer);
+
+    expect(consumer.dependency1 instanceof Dependency1).toBe(true);
+    expect(consumer.dependency2 instanceof Dependency2).toBe(true);
+});
+
+test('base object: resolves class hierarchy', async () => {
+    const container = new DefaultContainer();
+    container.bind(Dependency1Tag, Dependency1, BindingScope.singleton);
+    container.bind(Dependency2Tag, Dependency2, BindingScope.singleton);
+
+    const consumer = container.instantiate(Consumer);
 
     expect(consumer.dependency1 instanceof Dependency1).toBe(true);
     expect(consumer.dependency2 instanceof Dependency2).toBe(true);

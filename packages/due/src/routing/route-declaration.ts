@@ -2,7 +2,7 @@ import { Provider, Newable } from '../tools';
 import { Routable } from './routable';
 import { validRouteNameRegex } from './constants';
 
-export type PageProvider = Provider<Newable<Routable> | { default: Newable<Routable> }>;
+export type PageProvider<TPage extends Routable = Routable> = Provider<Newable<TPage> | { default: Newable<TPage> }>;
 
 /**
  * Base for all route types. Holds minimum information required for all route types.

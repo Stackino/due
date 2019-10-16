@@ -10,7 +10,8 @@ import { createObservedTemplate } from './internal/tools';
 function createPageElement(pageContext: PageContext): React.ReactElement<any> {
 	const currentState = pageContext.transition.active[pageContext.index];
 
-	const page = currentState.page as ReactPage;
+	// hack: adfkja
+	const page = currentState.page as unknown as ReactPage;
 
 	// hack: convert `Routable` to `ReactPage`
 	if (!page.template) {
@@ -55,7 +56,8 @@ function createPortalElements(container: Container, roots: Map<Portal<unknown, u
 			roots.set(portal, el);
 		}
 
-		const Component = (portal as ReactPortal<unknown, unknown>).template;
+		// hack: asdfsd
+		const Component = (portal as unknown as ReactPortal<unknown, unknown>).template;
 
 		if (!Component) {
 			throw new Error('Portal doesn\'t have template');

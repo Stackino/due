@@ -4,23 +4,23 @@ import { RouteDeclaration, LayoutRouteDeclaration, PageRouteDeclaration, PagePro
 
 export type BuildRouteDelegate = (builder: RouteBuilder) => void;
 
-interface RoutedPage {
+interface RoutedPage<TPage extends Routable = Routable> {
 	name: string;
 	url: string;
-	page: PageProvider;
+	page: PageProvider<TPage>;
 }
 
-interface RoutedLayout {
+interface RoutedLayout<TPage extends Routable = Routable> {
 	name?: string | null;
 	url?: string | null;
-	page?: PageProvider;
+	page?: PageProvider<TPage>;
 }
 
 export class RouteBuilder {
 	readonly actions: ((parent: RouteDeclaration) => RouteDeclaration)[] = [];
 
-	layout(config: RoutedLayout, children: BuildRouteDelegate): RouteBuilder;
-	layout(name: string | null, url: string | null, page: PageProvider | null, children: BuildRouteDelegate): RouteBuilder;
+	layout<TPage extends Routable>(config: RoutedLayout<TPage>, children: BuildRouteDelegate): RouteBuilder;
+	layout<TPage extends Routable>(name: string | null, url: string | null, page: PageProvider<TPage> | null, children: BuildRouteDelegate): RouteBuilder;
 	layout(...args: unknown[]): RouteBuilder {
 		if (args.length === 2) {
 			const [config, children] = args;
@@ -57,8 +57,8 @@ export class RouteBuilder {
 		return this;
 	}
 
-	page(config: RoutedPage): RouteBuilder;
-	page(name: string, url: string, page: PageProvider): RouteBuilder;
+	page<TPage extends Routable>(config: RoutedPage<TPage>): RouteBuilder;
+	page<TPage extends Routable>(name: string, url: string, page: PageProvider<TPage>): RouteBuilder;
 	page(...args: unknown[]): RouteBuilder {
 		if (args.length === 1) {
 			const [config] = args;

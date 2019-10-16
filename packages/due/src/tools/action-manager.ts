@@ -5,10 +5,10 @@ import { Container } from '../ioc';
 
 const trace = false;
 
-type Flow<TSelf> = (this: TSelf, ...args: any[]) => (AsyncIterableIterator<SideEffect> | IterableIterator<SideEffect> | PromiseLike<SideEffect | void> | void);
-type SideEffect = () => void;
+export type ActionFlow<TSelf> = (this: TSelf, ...args: any[]) => (AsyncIterableIterator<ActionSideEffect> | IterableIterator<ActionSideEffect> | PromiseLike<ActionSideEffect | void> | void);
+export type ActionSideEffect = () => void;
 
-export interface Action<TSelf, TFlow extends Flow<TSelf>> {
+export interface Action<TSelf, TFlow extends ActionFlow<TSelf>> {
 	(this: TSelf, ...args: Parameters<TFlow>): void;
 
 	readonly running: boolean;
@@ -36,7 +36,7 @@ function isAsyncIterableIterator<T>(obj: T): obj is Extract<T, AsyncIterableIter
 		typeof (obj as any)[Symbol.asyncIterator] === 'function';
 }
 
-export function action<TSelf, TFlow extends Flow<TSelf>>(self: TSelf, action: TFlow): Action<TSelf, TFlow> {
+export function action<TSelf, TFlow extends ActionFlow<TSelf>>(self: TSelf, action: TFlow): Action<TSelf, TFlow> {
 	const runningAtom = createAtom('Action \'running\'');
 	let runningCounter = 0;
 	let idCounter = 0;

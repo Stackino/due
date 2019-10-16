@@ -267,8 +267,8 @@ export class Router5RouterHandlerFactory implements RouterHandlerFactory {
 			router.usePlugin(browserPlugin({}));
 		}
 
-		const handler = new Router5RouterHandler(router, aliasToName, nameToAlias);
-		this.container.inject(handler);
+		const handler = this.container.instantiate(Router5RouterHandler, router, aliasToName, nameToAlias);
+
 		return handler;
 	}
 }

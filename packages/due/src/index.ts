@@ -1,4 +1,5 @@
 export * from './application';
+export * from './composition';
 export * from './diagnostics';
 export * from './ioc';
 export * from './plugin';

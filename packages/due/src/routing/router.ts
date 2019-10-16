@@ -103,8 +103,7 @@ export class DefaultRouter implements Router {
 	createTransition(from: Transition | null, to: Route, toParams: ReadonlyMap<string, string>): TransitionController {
 		const transitionId = this._latestTransitionId = `${_transitionCounter++}`;
 
-		const transition = new TransitionController(transitionId, from, to, toParams);
-		this.container.inject(transition);
+		const transition = this.container.instantiate(TransitionController, transitionId, from, to, toParams);
 
 		const nextPendingTransitions = this.pendingTransitions.slice();
 		nextPendingTransitions.push(transition);
@@ -246,7 +245,7 @@ export class DefaultRouter implements Router {
 	async portal<TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => Portal<TInput, TOutput>, input: TInput): Promise<TOutput | null> {
 		const portal = await this.openPortal(portalClass, input);
 
-		return this.waitForPortal(portal);
+		return this.waitForPortal(portal as Portal<unknown, TOutput>);
 	}
 
 	async openPortal<TPortal extends Portal<TInput, TOutput>, TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => TPortal, input: TInput): Promise<TPortal> {
@@ -284,7 +283,7 @@ export class DefaultRouter implements Router {
 			throw new Error('Attempt to use stopped router');
 		}
 
-		const lifecycle = this.portalLifecycles.get(portal);
+		const lifecycle = this.portalLifecycles.get(portal as Portal<unknown, unknown>);
 
 		if (!lifecycle) {
 			throw new Error('Attempt to wait for non-existing portal');
@@ -300,7 +299,7 @@ export class DefaultRouter implements Router {
 			throw new Error('Attempt to use stopped router');
 		}
 
-		const lifecycle = this.portalLifecycles.get(portal);
+		const lifecycle = this.portalLifecycles.get(portal as Portal<unknown, unknown>);
 
 		if (!lifecycle) {
 			throw new Error('Attempt to close non-existing portal');

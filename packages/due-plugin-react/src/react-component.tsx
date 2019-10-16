@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { observable, runInAction } from 'mobx';
-import { observer } from 'mobx-react-lite';
 import { useDependency } from './hooks';
-import { ContainerTag } from '@stackino/due';
+import { ContainerTag, Composable } from '@stackino/due';
 import { createObservedTemplate } from './internal/tools';
 
-export abstract class ReactComponent<TProps> {
+export abstract class ReactComponent<TProps> extends Composable {
 	constructor(props: TProps) {
+		super();
+
 		this.props = props;
 	}
 
@@ -31,13 +32,12 @@ export function connectReactComponent<TReactComponent extends ReactComponent<TPr
 		let instance = instanceRef.current;
 
 		if (!instance) {
-			instance = new reactComponent(props);
+			instance = container.instantiate(reactComponent, props);
 
 			if (!instance.template.displayName) {
 				instance.template.displayName = underlyingName;
 			}
 
-			container.inject(instance);
 			instanceRef.current = instance;
 		}
 

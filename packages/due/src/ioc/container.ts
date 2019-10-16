@@ -19,6 +19,14 @@ export const Constructed = Symbol('Stackino ioc constructed callback');
  */
 export const ContainerKey = Symbol('Stackino container');
 
+let currentContainer: Container | null = null;
+/**
+ * Returns current container within `inject` call, otherwise null.
+ */
+export function getCurrentContainer(): Container | null {
+	return currentContainer;
+}
+
 export interface Container {
 	/**
 	 * Bind `tag` to `impl` in `scope`.
@@ -48,6 +56,13 @@ export interface Container {
 	 * @param tag Tag of requested injectable.
 	 */
 	get<T>(tag: Tag<T>): T;
+
+	/**
+	 * Instantiate an object and inject its dependencies.
+	 * @param newable Object to be created.
+	 * @param params Constructor parameters.
+	 */
+	instantiate<T, TParams extends any[]>(ctor: new (...args: TParams) => T, ...args: TParams): T;
 
 	/**
 	 * Inject properties of given object.
@@ -115,11 +130,34 @@ export class DefaultContainer implements Container {
 	 * @param tag Tag of requested injectable.
 	 */
 	get<T>(tag: Tag<T>): T {
-		const result = this.impl.get<T>(tag.symbol);
+		currentContainer = this;
+		try {
+			const result = this.impl.get<T>(tag.symbol);
 
-		this.inject(result);
+			this.inject(result);
 
-		return result;
+			return result;
+		} finally {
+			currentContainer = null;
+		}
+	}
+
+	/**
+	 * Instantiate an object and inject its dependencies.
+	 * @param newable Object to be created.
+	 * @param params Constructor parameters.
+	 */
+	instantiate<T, TParams extends any[]>(ctor: new (...args: TParams) => T, ...args: TParams): T {
+		currentContainer = this;
+		try {
+			const result = new ctor(...args);
+
+			this.inject(result);
+
+			return result;
+		} finally {
+			currentContainer = null;
+		}
 	}
 
 	/**
@@ -138,11 +176,7 @@ export class DefaultContainer implements Container {
 				const tag = Reflect.getMetadata('stackino:ioc:inject-from', obj, injectProperty);
 
 				if (tag && tag.symbol) {
-					const value = this.impl.get(tag.symbol);
-
-					this.inject(value);
-
-					(obj as any)[injectProperty] = value;
+					(obj as any)[injectProperty] = this.get(tag);
 				} else {
 					typeof console === 'object' && console !== null && typeof console.warn === 'function' &&
 						console.warn(`Annotation 'stackino:ioc:inject-from' for property '${injectProperty.toString()}' has invalid tag '${tag}'`);

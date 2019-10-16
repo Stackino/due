@@ -60,8 +60,7 @@ export class TransitionController implements Transition {
 			Page = NoopRoutable;
 		}
 
-		const page = new Page();
-		this.container.inject(page);
+		const page = this.container.instantiate(Page);
 
 		return new State(route, page, async (setCommitAction) => {
 			if (page.enter) {

@@ -3,26 +3,42 @@ import { createRouter as createRouter5, Dependencies as Dependencies5, Navigatio
 import browserPlugin from 'router5-plugin-browser';
 import { Params as Params5 } from 'router5/types/types/base';
 
+const DATA_MAGIC = "~due~routing~data";
 const StackinoTransitionKey = Symbol('Stackino transition');
 
 const noParams: ReadonlyMap<string, string> = new Map();
 
-function params5ToParams(params5: Params5): ReadonlyMap<string, string> {
+function params5ToParams(params5: Params5): [ReadonlyMap<string, string>, ReadonlyMap<string | symbol, unknown>] {
 	const params = new Map<string, string>();
+	let data: Map<string | symbol, unknown> | null = null;
 
 	for (const key in params5) {
-		params.set(key, params5[key]);
+		const value = params5[key];
+
+		if (key === DATA_MAGIC) {
+			if (value instanceof Map) {
+				data = value;
+			}
+		} else {
+			params.set(key, params5[key]);
+		}
 	}
 
-	return params;
+	if (!data) {
+		data = new Map<string | symbol, unknown>();
+	}
+
+	return [params, data];
 }
 
-function paramsToParams5(params: ReadonlyMap<string, string>): { [key: string]: unknown } {
+function paramsToParams5(params: ReadonlyMap<string, string>, data?: ReadonlyMap<string | symbol, unknown>): { [key: string]: unknown } {
 	const params5: { [key: string]: unknown } = {};
 
 	params.forEach((v, k) => {
 		params5[k] = v;
 	});
+
+	params5[DATA_MAGIC] = data;
 
 	return params5;
 }
@@ -73,7 +89,9 @@ export class Router5RouterHandler implements RouterHandler {
 
 					console.log(`Transition ${fromName ? fromName : 'n/a'} => ${toName} - creating`);
 
-					const transition = this.router.createTransitionToName(this.router.activeTransition, toName, params5ToParams(toState.params));
+					const [toParams, toData] = params5ToParams(toState.params);
+
+					const transition = this.router.createTransitionToName(this.router.activeTransition, toName, toParams, toData);
 
 					(toState as any)[StackinoTransitionKey] = transition;
 				},
@@ -155,7 +173,7 @@ export class Router5RouterHandler implements RouterHandler {
 		return this.router5.buildPath(alias, paramsToParams5(params));
 	}
 
-	goTo(route: Route, params?: ReadonlyMap<string, string> | undefined): void {
+	goTo(route: Route, params?: ReadonlyMap<string, string> | undefined, data?: ReadonlyMap<string | symbol, unknown> | undefined): void {
 		if (!this.router5 || !this.nameToAlias) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -172,7 +190,7 @@ export class Router5RouterHandler implements RouterHandler {
 
 		this.router5.cancel();
 
-		this.router5.navigate(alias, paramsToParams5(params), { force: true });
+		this.router5.navigate(alias, paramsToParams5(params, data), { force: true });
 	}
 }
 

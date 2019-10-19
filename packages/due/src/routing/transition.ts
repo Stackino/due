@@ -20,6 +20,7 @@ export interface Transition {
 	readonly from: Transition | null;
 	readonly to: Route;
 	readonly toParams: ReadonlyMap<string, string>;
+	readonly toData: ReadonlyMap<string | symbol, unknown>;
 	readonly status: TransitionStatus;
 	readonly finished: Promise<void>;
 	readonly entering: readonly State[];
@@ -42,7 +43,8 @@ export class TransitionController implements Transition {
 		readonly id: string,
 		readonly from: Transition | null,
 		readonly to: Route,
-		readonly toParams: ReadonlyMap<string, string>
+		readonly toParams: ReadonlyMap<string, string>,
+		readonly toData: ReadonlyMap<string | symbol, unknown>
 	) {
 	}
 

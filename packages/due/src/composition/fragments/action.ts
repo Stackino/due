@@ -1,12 +1,12 @@
 import { createAtom } from 'mobx';
-import { ContainerKey } from '..';
-import { DiagnosticsServiceTag } from '../diagnostics';
-import { Container } from '../ioc';
+import { DiagnosticsServiceTag } from '../../diagnostics';
+import { Container, ContainerKey } from '../../ioc';
 
 const trace = false;
 
-export type ActionFlow<TSelf> = (this: TSelf, ...args: any[]) => (AsyncIterableIterator<ActionSideEffect> | IterableIterator<ActionSideEffect> | PromiseLike<ActionSideEffect | void> | void);
 export type ActionSideEffect = () => void;
+export type ActionFlowResult = AsyncIterableIterator<ActionSideEffect> | IterableIterator<ActionSideEffect> | PromiseLike<ActionSideEffect | void> | void;
+export type ActionFlow<TSelf> = (this: TSelf, ...args: any[]) => ActionFlowResult;
 
 export interface Action<TSelf, TFlow extends ActionFlow<TSelf>> {
 	(this: TSelf, ...args: Parameters<TFlow>): void;

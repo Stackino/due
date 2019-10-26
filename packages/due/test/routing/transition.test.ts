@@ -60,7 +60,7 @@ test('parents are set properly', async () => {
 test('transition intersection', async () => {
     const [container, registry] = await setup();
 
-    const signInTransition = new TransitionController('0', null, registry.getByName('sign-in'), new Map());
+    const signInTransition = new TransitionController('0', null, registry.getByName('sign-in'), new Map(), new Map());
     container.inject(signInTransition);
     await signInTransition.execute();
     expect(signInTransition.status).toBe(TransitionStatus.executed);
@@ -71,7 +71,7 @@ test('transition intersection', async () => {
         '$<root>.sign-in',
     ]);
 
-    const productDetail1Transition = new TransitionController('1', signInTransition, registry.getByName('portal.products.detail'), new Map([['tenantId', '1'], ['productId', '1']]));
+    const productDetail1Transition = new TransitionController('1', signInTransition, registry.getByName('portal.products.detail'), new Map([['tenantId', '1'], ['productId', '1']]), new Map());
     container.inject(productDetail1Transition);
     await productDetail1Transition.execute();
     expect(productDetail1Transition.status).toBe(TransitionStatus.executed);
@@ -88,7 +88,7 @@ test('transition intersection', async () => {
     ]);
     
     // transitioning using only parameter should trigger exit/enter of self
-    const productDetail2Transition = new TransitionController('2', productDetail1Transition, registry.getByName('portal.products.detail'), new Map([['tenantId', '1'], ['productId', '2']]));
+    const productDetail2Transition = new TransitionController('2', productDetail1Transition, registry.getByName('portal.products.detail'), new Map([['tenantId', '1'], ['productId', '2']]), new Map());
     container.inject(productDetail2Transition);
     await productDetail2Transition.execute();
     expect(productDetail2Transition.status).toBe(TransitionStatus.executed);
@@ -105,7 +105,7 @@ test('transition intersection', async () => {
     ]);
     
     // transitioning using only parameter should trigger exit/enter of self and all child nodes
-    const productDetail3Transition = new TransitionController('3', productDetail2Transition, registry.getByName('portal.products.detail'), new Map([['tenantId', '2'], ['productId', '2']]));
+    const productDetail3Transition = new TransitionController('3', productDetail2Transition, registry.getByName('portal.products.detail'), new Map([['tenantId', '2'], ['productId', '2']]), new Map());
     container.inject(productDetail3Transition);
     await productDetail3Transition.execute();
     expect(productDetail3Transition.status).toBe(TransitionStatus.executed);

@@ -1,4 +1,3 @@
-export * from './action-manager';
 export * from './browser-request';
 export * from './delay';
 export * from './device-id';

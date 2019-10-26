@@ -24,10 +24,10 @@
     "mobx": "^4.9.0 || ^5.9.0"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.19",
+    "@types/jest": "^24.0.20",
     "jest": "^24.9.0",
     "ts-jest": "^24.1.0",
-    "ts-loader": "^6.2.0",
+    "ts-loader": "^6.2.1",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.4",
     "webpack": "^4.41.2",

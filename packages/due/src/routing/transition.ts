@@ -65,8 +65,8 @@ export class TransitionController implements Transition {
 		const page = this.container.instantiate(Page);
 
 		return new State(route, page, async (setCommitAction) => {
-			if (page.enter) {
-				const enterCommit = await page.enter(this);
+			if (page.onEntering) {
+				const enterCommit = await page.onEntering(this);
 
 				if (enterCommit) {
 					setCommitAction(enterCommit);
@@ -77,8 +77,8 @@ export class TransitionController implements Transition {
 
 	private async createRetainingState(state: State): Promise<State> {
 		return new State(state.route, state.page, async (setCommitAction) => {
-			if (state.page.retain) {
-				const retainCommit = await state.page.retain(this);
+			if (state.page.onRetaining) {
+				const retainCommit = await state.page.onRetaining(this);
 
 				if (retainCommit) {
 					setCommitAction(retainCommit);
@@ -89,8 +89,8 @@ export class TransitionController implements Transition {
 
 	private async createExitingState(state: State): Promise<State> {
 		return new State(state.route, state.page, async (setCommitAction) => {
-			if (state.page.exit) {
-				const exitCommit = await state.page.exit(this);
+			if (state.page.onExiting) {
+				const exitCommit = await state.page.onExiting(this);
 
 				if (exitCommit) {
 					setCommitAction(exitCommit);
@@ -114,6 +114,7 @@ export class TransitionController implements Transition {
 		const retainedPromises: Promise<State>[] = [];
 		const exitingPromises: Promise<State>[] = [];
 
+		// determine which states are entering/retaining/exiting
 		let intersection: Route | null = null;
 		if (this.from) {
 			let retaining = true;
@@ -153,6 +154,7 @@ export class TransitionController implements Transition {
 			current = current.parent;
 		}
 
+		// wait for states to be loaded
 		const entering = await Promise.all(enteringPromises);
 		const retained = await Promise.all(retainedPromises);
 		const exiting = await Promise.all(exitingPromises);
@@ -161,6 +163,7 @@ export class TransitionController implements Transition {
 			return;
 		}
 
+		// execute pre-render lifecycle methods
 		this._entering = entering;
 		this._retained = retained;
 		this._exiting = exiting;
@@ -188,6 +191,7 @@ export class TransitionController implements Transition {
 			}
 		}
 
+		// mark as executed (including pre-render lifecycle methods)
 		this._status = TransitionStatus.executed;
 	}
 

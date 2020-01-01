@@ -1,7 +1,7 @@
 import { Tag, injectable, inject, ContainerTag, Container } from '../ioc';
 import { Transition, TransitionController, TransitionStatus } from './transition';
 import { Route } from './route';
-import { Portal, PortalController, PortalLifecycle } from './portalable';
+import { Portal, PortalController, PortalLifecycle } from './portal';
 import { RouteRegistryTag, RouteRegistry, RouteDeclaration, State } from '.';
 import { PromiseCompletitionSource, executeProvider } from '..';
 import { observable, when } from 'mobx';

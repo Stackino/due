@@ -30,6 +30,51 @@ export interface RouterHandlerFactory {
 	create(main: boolean): Promise<RouterHandler>;
 }
 
+export type RouteParams = { readonly [key: string]: string } | ReadonlyMap<string, string>;
+export type RouteData = { readonly [key: string]: string } | ReadonlyMap<string | symbol, unknown>;
+
+export function normalizeRouteParams(params: RouteParams): ReadonlyMap<string, string> {
+	if (params instanceof Map) {
+		return params;
+	}
+	
+	const result = new Map<string, string>();
+
+	for (const [k, v] of Object.entries(params)) {
+		result.set(k, v);
+	}
+
+	return result;
+}
+export function normalizeOptionalRouteParams(params?: RouteParams): ReadonlyMap<string, string> | undefined {
+	if (!params) {
+		return undefined;
+	}
+
+	return normalizeRouteParams(params);
+}
+
+export function normalizeRouteData(data: RouteData): ReadonlyMap<string | symbol, unknown> {
+	if (data instanceof Map) {
+		return data;
+	}
+
+	const result = new Map<string, string>();
+
+	for (const [k, v] of Object.entries(data)) {
+		result.set(k, v);
+	}
+
+	return result;
+}
+export function normalizeOptionalRouteData(data?: RouteData): ReadonlyMap<string | symbol, unknown> | undefined {
+	if (!data) {
+		return undefined;
+	}
+
+	return normalizeRouteData(data);
+}
+
 export interface Router {
 	readonly activeTransition: Transition | null;
 	readonly pendingTransitions: readonly Transition[];
@@ -38,22 +83,22 @@ export interface Router {
 
 	start(): Promise<void>;
 
-	createTransition(from: Transition | null, to: Route, toParams: ReadonlyMap<string, string>, toData: ReadonlyMap<string | symbol, unknown>): TransitionController;
-	createTransitionToDeclaration(from: Transition | null, declaration: RouteDeclaration, toParams: ReadonlyMap<string, string>, toData: ReadonlyMap<string | symbol, unknown>): TransitionController;
-	createTransitionToId(from: Transition | null, toId: string, toParams: ReadonlyMap<string, string>, toData: ReadonlyMap<string | symbol, unknown>): TransitionController;
-	createTransitionToName(from: Transition | null, toName: string, toParams: ReadonlyMap<string, string>, toData: ReadonlyMap<string | symbol, unknown>): TransitionController;
+	createTransition(from: Transition | null, to: Route, toParams: RouteParams, toData: RouteData): TransitionController;
+	createTransitionToDeclaration(from: Transition | null, declaration: RouteDeclaration, toParams: RouteParams, toData: RouteData): TransitionController;
+	createTransitionToId(from: Transition | null, toId: string, toParams: RouteParams, toData: RouteData): TransitionController;
+	createTransitionToName(from: Transition | null, toName: string, toParams: RouteParams, toData: RouteData): TransitionController;
 
-	isActive(route: Route, params?: ReadonlyMap<string, string>): boolean;
-	isActiveId(id: string, params?: ReadonlyMap<string, string>): boolean;
-	isActiveName(name: string, params?: ReadonlyMap<string, string>): boolean;
+	isActive(route: Route, params?: RouteParams): boolean;
+	isActiveId(id: string, params?: RouteParams): boolean;
+	isActiveName(name: string, params?: RouteParams): boolean;
 
-	pathFor(route: Route, params?: ReadonlyMap<string, string>): string;
-	pathForId(id: string, params?: ReadonlyMap<string, string>): string;
-	pathForName(name: string, params?: ReadonlyMap<string, string>): string;
+	pathFor(route: Route, params?: RouteParams): string;
+	pathForId(id: string, params?: RouteParams): string;
+	pathForName(name: string, params?: RouteParams): string;
 
-	goTo(route: Route, params?: ReadonlyMap<string, string>, data?: ReadonlyMap<string | symbol, unknown>): void;
-	goToId(id: string, params?: ReadonlyMap<string, string>, data?: ReadonlyMap<string | symbol, unknown>): void;
-	goToName(name: string, params?: ReadonlyMap<string, string>, data?: ReadonlyMap<string | symbol, unknown>): void;
+	goTo(route: Route, params?: RouteParams, data?: RouteData): void;
+	goToId(id: string, params?: RouteParams, data?: RouteData): void;
+	goToName(name: string, params?: RouteParams, data?: RouteData): void;
 
 	portal<TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => Portal<TInput, TOutput>, input: TInput): Promise<TOutput | null>;
 	openPortal<TPortal extends Portal<TInput, TOutput>, TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => TPortal, input: TInput): Promise<TPortal>;
@@ -100,7 +145,10 @@ export class DefaultRouter implements Router {
 		this.handler = await this.routerHandlerFactory.create(true);
 	}
 
-	createTransition(from: Transition | null, to: Route, toParams: ReadonlyMap<string, string>, toData: ReadonlyMap<string | symbol, unknown>): TransitionController {
+	createTransition(from: Transition | null, to: Route, toParams: RouteParams, toData: RouteData): TransitionController {
+		toParams = normalizeRouteParams(toParams);
+		toData = normalizeRouteData(toData);
+
 		const transitionId = this._latestTransitionId = `${_transitionCounter++}`;
 
 		const transition = this.container.instantiate(TransitionController, transitionId, from, to, toParams, toData);
@@ -123,25 +171,25 @@ export class DefaultRouter implements Router {
 		return transition;
 	}
 
-	createTransitionToDeclaration(from: Transition | null, toDeclaration: RouteDeclaration, toParams: ReadonlyMap<string, string>, toData: ReadonlyMap<string | symbol, unknown>): TransitionController {
+	createTransitionToDeclaration(from: Transition | null, toDeclaration: RouteDeclaration, toParams: RouteParams, toData: RouteData): TransitionController {
 		const to = this.routeRegistry.getByDeclaration(toDeclaration);
 
 		return this.createTransition(from, to, toParams, toData);
 	}
 
-	createTransitionToId(from: Transition | null, toId: string, toParams: ReadonlyMap<string, string>, toData: ReadonlyMap<string | symbol, unknown>): TransitionController {
+	createTransitionToId(from: Transition | null, toId: string, toParams: RouteParams, toData: RouteData): TransitionController {
 		const to = this.routeRegistry.getById(toId);
 
 		return this.createTransition(from, to, toParams, toData);
 	}
 
-	createTransitionToName(from: Transition | null, toName: string, toParams: ReadonlyMap<string, string>, toData: ReadonlyMap<string | symbol, unknown>): TransitionController {
+	createTransitionToName(from: Transition | null, toName: string, toParams: RouteParams, toData: RouteData): TransitionController {
 		const to = this.routeRegistry.getByName(toName);
 
 		return this.createTransition(from, to, toParams, toData);
 	}
 
-	isActive(route: Route, params?: ReadonlyMap<string, string>): boolean {
+	isActive(route: Route, params?: RouteParams): boolean {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -151,10 +199,12 @@ export class DefaultRouter implements Router {
 			return false;
 		}
 
-		return transition.active.findIndex(s => Route.equals(s.route, transition.toParams, route, params)) !== -1;
+		const normalizedParams = normalizeOptionalRouteParams(params);
+
+		return transition.active.findIndex(s => Route.equals(s.route, transition.toParams, route, normalizedParams)) !== -1;
 	}
 
-	isActiveId(id: string, params?: ReadonlyMap<string, string>): boolean {
+	isActiveId(id: string, params?: RouteParams): boolean {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -164,7 +214,7 @@ export class DefaultRouter implements Router {
 		return this.isActive(route, params);
 	}
 
-	isActiveName(name: string, params?: ReadonlyMap<string, string>): boolean {
+	isActiveName(name: string, params?: RouteParams): boolean {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -174,7 +224,7 @@ export class DefaultRouter implements Router {
 		return this.isActive(route, params);
 	}
 
-	pathFor(route: Route, params?: ReadonlyMap<string, string>): string {
+	pathFor(route: Route, params?: RouteParams): string {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -183,10 +233,12 @@ export class DefaultRouter implements Router {
 			throw new Error(`Route '${route.id}' is not navigable`);
 		}
 
-		return this.handler.pathFor(route, params);
+		const normalizedParams = normalizeOptionalRouteParams(params);
+
+		return this.handler.pathFor(route, normalizedParams);
 	}
 
-	pathForId(id: string, params?: ReadonlyMap<string, string>): string {
+	pathForId(id: string, params?: RouteParams): string {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -196,7 +248,7 @@ export class DefaultRouter implements Router {
 		return this.pathFor(route, params);
 	}
 
-	pathForName(name: string, params?: ReadonlyMap<string, string>): string {
+	pathForName(name: string, params?: RouteParams): string {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -206,15 +258,18 @@ export class DefaultRouter implements Router {
 		return this.pathFor(route, params);
 	}
 
-	goTo(route: Route, params?: ReadonlyMap<string, string>, data?: ReadonlyMap<string | symbol, unknown>): void {
+	goTo(route: Route, params?: RouteParams, data?: RouteData): void {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
 
-		return this.handler.goTo(route, params, data);
+		const normalizedParams = normalizeOptionalRouteParams(params);
+		const normalizedData = normalizeOptionalRouteData(data);
+
+		return this.handler.goTo(route, normalizedParams, normalizedData);
 	}
 
-	goToId(id: string, params?: ReadonlyMap<string, string>, data?: ReadonlyMap<string | symbol, unknown>): void {
+	goToId(id: string, params?: RouteParams, data?: RouteData): void {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -224,7 +279,7 @@ export class DefaultRouter implements Router {
 		this.goTo(route, params, data);
 	}
 
-	goToName(name: string, params?: ReadonlyMap<string, string>, data?: ReadonlyMap<string | symbol, unknown>): void {
+	goToName(name: string, params?: RouteParams, data?: RouteData): void {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -234,7 +289,7 @@ export class DefaultRouter implements Router {
 		this.goTo(route, params, data);
 	}
 
-	// portals - todo: move
+	// portals - todo: move?
 
 	private portalLifecycles: Map<Portal<unknown, unknown>, PortalLifecycle> = new Map();
 	private portalsValue = observable.box<Portal<unknown, unknown>[]>([]);

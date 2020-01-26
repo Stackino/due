@@ -90,7 +90,7 @@ export interface ViewProps {
 export const View: React.FunctionComponent<ViewProps> = (props): React.ReactElement | null => {
 	const pageContext = props.pageContext || usePageContext();
 
-	if (!pageContext) {
+	if (!pageContext || pageContext.transition.active.length <= pageContext.index + 1) {
 		return null;
 	}
 

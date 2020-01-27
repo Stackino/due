@@ -85,6 +85,8 @@ function createPortalElements(container: Container, roots: Map<Portal<unknown, u
 
 export interface ViewProps {
 	pageContext?: PageContext;
+	
+	children?: (pageElement: React.ReactElement) => React.ReactElement;
 }
 
 export const View: React.FunctionComponent<ViewProps> = (props): React.ReactElement | null => {
@@ -101,7 +103,9 @@ export const View: React.FunctionComponent<ViewProps> = (props): React.ReactElem
 		index: pageContext.index + 1,
 	};
 
-	return createPageElement(nextPageContext);
+	const pageElement = createPageElement(nextPageContext);
+
+	return props.children ? props.children(pageElement) : pageElement;
 }
 View.displayName = 'View';
 

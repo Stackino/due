@@ -6,7 +6,7 @@
         "build:prod": "yarn workspaces run build:prod",
         "docs:dev": "vuepress dev ./docs-src",
         "docs:prod": "vuepress build ./docs-src --dest ./docs",
-        "publish": "yarn workspaces run publish --patch --no-git-tag-version --access=public",
+        "publish": "yarn workspaces run publish-now",
         "test": "yarn workspaces run test"
     },
     "workspaces": [

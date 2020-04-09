@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due-plugin-progress",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",
@@ -13,6 +13,7 @@
     "test": "jest",
     "watch:dev": "webpack --mode development --watch",
     "watch:prod": "webpack --mode production --watch",
+    "publish-now": "yarn publish --patch --no-git-tag-version --access=public",
     "prepublishOnly": "yarn run build:prod"
   },
   "dependencies": {

@@ -1,7 +1,8 @@
 import { Constructed, DefaultContainer, ContainerTag, inject, injectable, RouteRegistry, pathCombine, Route, Router, RouterHandler, RouterHandlerFactory, RouterHandlerFactoryTag, RouteRegistryTag, RouterTag, Transition, TransitionController } from '@stackino/due';
-import { createRouter as createRouter5, Dependencies as Dependencies5, NavigationOptions as NavigationOptions5, Plugin as Plugin5, Route as Route5, Router as Router5, State as State5 } from 'router5';
+import { createRouter as createRouter5, NavigationOptions as NavigationOptions5, Plugin as Plugin5, Route as Route5, Router as Router5, State as State5 } from 'router5';
 import browserPlugin from 'router5-plugin-browser';
-import { Params as Params5 } from 'router5/types/types/base';
+import { DefaultDependencies as Dependencies5 } from 'router5/dist/types/router';
+import { Params as Params5 } from 'router5/dist/types/base';
 
 const DATA_MAGIC = "~due~routing~data";
 const StackinoTransitionKey = Symbol('Stackino transition');

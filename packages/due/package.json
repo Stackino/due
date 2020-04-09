@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "classnames": "^2.2.6",
-    "path-parser": "^5.1.0",
-    "tslib": "^1.10.0",
+    "path-parser": "^6.1.0",
+    "tslib": "^1.11.1",
     "ua-parser-js": "^0.7.21"
   },
   "peerDependencies": {
@@ -27,20 +27,20 @@
     "reflect-metadata": "^0.1.0"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.25",
+    "@types/jest": "^25.2.1",
     "@types/ua-parser-js": "^0.7.33",
-    "@types/webpack": "^4.41.1",
-    "@types/webpack-env": "^1.14.1",
-    "@typescript-eslint/eslint-plugin": "^2.14.0",
-    "@typescript-eslint/parser": "^2.14.0",
+    "@types/webpack": "^4.41.10",
+    "@types/webpack-env": "^1.15.1",
+    "@typescript-eslint/eslint-plugin": "^2.27.0",
+    "@typescript-eslint/parser": "^2.27.0",
     "eslint": "^6.8.0",
-    "eslint-loader": "^3.0.3",
-    "jest": "^24.9.0",
-    "ts-jest": "^24.2.0",
-    "ts-loader": "^6.2.1",
-    "ts-node": "^8.5.4",
-    "typescript": "^3.7.4",
-    "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10"
+    "eslint-loader": "^4.0.0",
+    "jest": "^25.3.0",
+    "ts-jest": "^25.3.1",
+    "ts-loader": "^6.2.2",
+    "ts-node": "^8.8.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   }
 }

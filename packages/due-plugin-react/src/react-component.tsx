@@ -43,12 +43,14 @@ export function connectReactComponent<TReactComponent extends ReactComponent<TPr
 
 		const ObservedComponent = createObservedTemplate('ReactComponent', instance.template);
 
-		runInAction(() => {
-			if (instance!.onUpdate) {
-				instance!.onUpdate(props, instance!.props);
-			}
-			instance!.props = props;
-		});
+		React.useEffect(() => {
+			runInAction(() => {
+				if (instance!.onUpdate) {
+					instance!.onUpdate(props, instance!.props);
+				}
+				instance!.props = props;
+			});
+		}, [props]);
 
 		return <ObservedComponent />;
 	};

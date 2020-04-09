@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due-plugin-progress",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",

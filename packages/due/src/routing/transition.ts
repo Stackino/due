@@ -4,7 +4,7 @@ import { NoopRoutable, Routable } from './routable';
 import { PromiseCompletitionSource, executeProvider, Newable } from '../tools';
 import { Container, inject, ContainerTag } from '../ioc';
 import { DiagnosticsServiceTag, DiagnosticsService } from '../diagnostics';
-import { StackinoDueConfiguration } from 'config';
+import { StackinoDueConfiguration } from '../config';
 
 export enum TransitionStatus {
 	pristine = 100,

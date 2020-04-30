@@ -1,6 +1,6 @@
 
 export class StackinoDueConfiguration {
 
-    static retainRoutesWithDifferingParameters: 'always' | 'with-onRetaining' | 'never' = 'with-onRetaining';
+	static retainRoutesWithDifferingParameters: 'always' | 'with-onRetaining' | 'never' = 'with-onRetaining';
 
 }

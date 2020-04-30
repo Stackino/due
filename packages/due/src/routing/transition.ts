@@ -4,6 +4,7 @@ import { NoopRoutable, Routable } from './routable';
 import { PromiseCompletitionSource, executeProvider, Newable } from '../tools';
 import { Container, inject, ContainerTag } from '../ioc';
 import { DiagnosticsServiceTag, DiagnosticsService } from '../diagnostics';
+import { StackinoDueConfiguration } from 'config';
 
 export enum TransitionStatus {
 	pristine = 100,
@@ -122,10 +123,25 @@ export class TransitionController implements Transition {
 			for (let i = 0; i < this.from.active.length; i++) {
 				const current = this.from.active[i];
 
+				let compareParameters = true;
+				switch (StackinoDueConfiguration.retainRoutesWithDifferingParameters) {
+					case 'always':
+						compareParameters = false;
+						break;
+
+					case 'never':
+						compareParameters = true;
+						break;
+
+					case 'with-onRetaining':
+						compareParameters = !current.page.onRetaining;
+						break;
+				}
+
 				if (retaining) {
 					if (
-						!Route.equals(current.route, this.from.toParams, this.to, this.toParams) &&
-						this.to.parents.findIndex(x => Route.equals(current.route, this.from!.toParams, x, this.toParams)) === -1
+						!Route.equals(current.route, this.from.toParams, this.to, compareParameters ? this.toParams : undefined) &&
+						this.to.parents.findIndex(x => Route.equals(current.route, this.from!.toParams, x, compareParameters ? this.toParams : undefined)) === -1
 					) {
 						retaining = false;
 					} else {
@@ -138,7 +154,7 @@ export class TransitionController implements Transition {
 
 					retainedPromises.push(retainingPromise);
 				} else {
-					const exitingPromise = this.createExitingState( current);
+					const exitingPromise = this.createExitingState(current);
 
 					exitingPromises.unshift(exitingPromise);
 				}

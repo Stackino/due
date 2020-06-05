@@ -1,5 +1,5 @@
 {
-  "name": "@stackino/due-preset-react",
+  "name": "@stackino/due-plugin-odachirpcclient",
   "version": "0.1.35",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
@@ -16,34 +16,17 @@
     "publish-now": "yarn publish --patch --no-git-tag-version --access=public",
     "prepublishOnly": "yarn run build:prod"
   },
-  "dependencies": {
-    "@stackino/due": "0.1.x",
-    "@stackino/due-plugin-progress": "0.1.x",
-    "@stackino/due-plugin-react": "0.1.x",
-    "@stackino/due-plugin-router5": "0.1.x",
-    "tslib": "^2.0.0"
-  },
   "peerDependencies": {
-    "inversify": "^5.0.0",
-    "mobx": "^4.9.0 || ^5.9.0",
-    "reflect-metadata": "^0.1.0"
+    "@odachi/rpc-client": "^0.1.0"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
-    "@types/ua-parser-js": "^0.7.33",
-    "@types/webpack": "^4.41.17",
-    "@types/webpack-env": "^1.15.2",
-    "@typescript-eslint/eslint-plugin": "^3.1.0",
-    "@typescript-eslint/parser": "^3.1.0",
-    "eslint": "^7.1.0",
-    "eslint-loader": "^4.0.2",
     "jest": "^26.0.1",
     "ts-jest": "^26.1.0",
     "ts-loader": "^7.0.5",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.5",
     "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11",
-    "webpack-node-externals": "^1.7.2"
+    "webpack-cli": "^3.3.11"
   }
 }

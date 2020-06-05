@@ -56,7 +56,7 @@ export class Router5RouterHandler implements RouterHandler {
 		this.router5 = router5;
 	}
 
-	[Constructed] = () => {
+	[Constructed] = (): void => {
 		this.router5.useMiddleware(() => async (toState, fromState) => {
 			const transition = (toState as any)[StackinoTransitionKey] as unknown;
 			if (!(transition instanceof TransitionController)) {

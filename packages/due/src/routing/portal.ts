@@ -89,7 +89,7 @@ export class PortalController<TInput, TOutput> {
 	 * @param output Output value to be presented to portal opener.
 	 * @param animate If true set status to `closing` and wait for `closed` call. If false set status directly to `closed`. Default `true`;
 	 */
-	close(output: TOutput | null, animate: boolean = true) {
+	close(output: TOutput | null, animate: boolean = true): void {
 		if (this.status !== 'open') {
 			console.warn(`Attempt to close portal, but status is '${this.status}', expected 'open'`);
 			return;
@@ -102,7 +102,7 @@ export class PortalController<TInput, TOutput> {
 	/**
 	 * Finish closing portal. Expected to be called after `close` when `animate` is set to `true`.
 	 */
-	closed() {
+	closed(): void {
 		if (this.status !== 'closing') {
 			if (this.status !== 'closed') {
 				console.warn(`Attempt to finish closing portal, but status is '${this.status}', expected 'closing'`);

@@ -9,7 +9,7 @@ export class ProgressPlugin extends Plugin {
 	private running: boolean = false;
 	private visible: boolean = false;
 
-	onStarting(services: Container) {
+	onStarting(services: Container): void | Promise<void> {
 		if (this.running) {
 			throw new Error('Attempt to start running progress plugin');
 		}
@@ -44,7 +44,7 @@ export class ProgressPlugin extends Plugin {
 		);
 	}
 
-	onStopping() {
+	onStopping(): void | Promise<void> {
 		if (!this.running) {
 			throw new Error('Attempt to stop stopped progress plugin');
 		}

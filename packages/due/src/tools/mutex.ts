@@ -32,7 +32,7 @@ export class Mutex {
 	/**
 	 * Returns whether mutex is locked or not.
 	 */
-	get locked() {
+	get locked(): boolean {
 		return this.current !== null;
 	}
 
@@ -84,7 +84,7 @@ export class Mutex {
 		return lease;
 	}
 
-	async run<T>(action: () => T | Promise<T>) {
+	async run<T>(action: () => T | Promise<T>): Promise<T> {
 		const release = await this.acquire();
 		try {
 			return await action();

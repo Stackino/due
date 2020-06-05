@@ -11,15 +11,17 @@
     },
     "workspaces": [
         "packages/due",
+        "packages/due-plugin-odachirpcclient",
         "packages/due-plugin-progress",
         "packages/due-plugin-react",
         "packages/due-plugin-router5",
         "packages/due-preset-react"
     ],
     "devDependencies": {
+        "@odachi/rpc-client": "0.1.2",
         "inversify": "^5.0.1",
         "mobx": "^5.15.4",
-        "mobx-react-lite": "^2.0.6",
+        "mobx-react-lite": "^2.0.7",
         "react": "^16.13.1",
         "react-dom": "^16.13.1",
         "reflect-metadata": "^0.1.13"

@@ -38,7 +38,7 @@ export class ReactPlugin extends Plugin {
 
 	private options: ReactRenderServiceOptions;
 
-	configureServices(container: DefaultContainer) {
+	configureServices(container: DefaultContainer): void | Promise<void> {
 		container.bindConstantValue(ReactRenderServiceOptionsTag, this.options);
 		container.bind(RenderServiceTag, ReactRenderService, BindingScope.singleton);
 	}

@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-types */
+
 /**
  * Verify value is an object. `T` describes object type, however it is not checked whether it actually matches.
  * @param value Value to be checked.
  */
-export function isObject<T extends {}>(value: unknown): value is T {
+export function isObject<T extends object>(value: unknown): value is T {
 	return typeof value === 'object' && value !== null;
 }
 
@@ -10,7 +12,7 @@ export function isObject<T extends {}>(value: unknown): value is T {
  * Verify value is an object or null. `T` describes object type, however it is not checked whether it actually matches.
  * @param value Value to be checked.
  */
-export function isObjectOrNull<T extends {}>(value: unknown): value is T | null {
+export function isObjectOrNull<T extends object>(value: unknown): value is T | null {
 	return isObject<T>(value) || value === null;
 }
 

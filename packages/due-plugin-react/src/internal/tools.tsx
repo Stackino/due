@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite';
 
 const ObservedComponentKey = Symbol('Stackino due react observed component');
 
-export function createObservedTemplate(name: string, template: React.FunctionComponent) {
+export function createObservedTemplate(name: string, template: React.FunctionComponent): React.FunctionComponent {
 	if (!template.displayName) {
 		template.displayName = template.displayName || template.name || 'Anonymous template';
 	}

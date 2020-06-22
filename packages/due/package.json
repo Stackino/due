@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due",
-  "version": "0.1.35",
+  "version": "0.1.36",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",

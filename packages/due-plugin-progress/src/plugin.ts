@@ -1,4 +1,4 @@
-import { Container, Plugin, RouterTag, Transition } from '@stackino/due';
+import { Plugin, RouterTag, Transition, ServiceProvider } from '@stackino/due';
 import { reaction, IReactionDisposer, comparer } from 'mobx';
 
 const topbar = require('topbar');
@@ -9,7 +9,7 @@ export class ProgressPlugin extends Plugin {
 	private running: boolean = false;
 	private visible: boolean = false;
 
-	onStarting(services: Container): void | Promise<void> {
+	onStarting(services: ServiceProvider): void | Promise<void> {
 		if (this.running) {
 			throw new Error('Attempt to start running progress plugin');
 		}

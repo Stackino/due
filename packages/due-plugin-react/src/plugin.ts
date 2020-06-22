@@ -1,4 +1,4 @@
-import { BindingScope, DefaultContainer, Plugin, RenderServiceTag } from '@stackino/due';
+import { Plugin, RenderServiceTag, ServiceCollection } from '@stackino/due';
 import { ReactRenderService, ReactRenderServiceOptions, ReactRenderServiceOptionsTag } from './render-service';
 
 export interface ReactPluginOptions {
@@ -38,8 +38,8 @@ export class ReactPlugin extends Plugin {
 
 	private options: ReactRenderServiceOptions;
 
-	configureServices(container: DefaultContainer): void | Promise<void> {
-		container.bindConstantValue(ReactRenderServiceOptionsTag, this.options);
-		container.bind(RenderServiceTag, ReactRenderService, BindingScope.singleton);
+	configureServices(services: ServiceCollection): void | Promise<void> {
+		services.bind(ReactRenderServiceOptionsTag).toValue(this.options).inSingletonLifetime();
+		services.bind(RenderServiceTag).toClass(ReactRenderService).inSingletonLifetime();
 	}
 }

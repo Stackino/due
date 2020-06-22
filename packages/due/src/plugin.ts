@@ -1,7 +1,7 @@
-import { Container } from './ioc';
+import { ServiceProviderTag, ServiceProvider, ServiceCollection } from './ioc';
 
 export abstract class Plugin {
-	configureServices?(services: Container): void | Promise<void>;
-	onStarting?(services: Container): void | Promise<void>;
-	onStopping?(services: Container): void | Promise<void>;
+	configureServices?(services: ServiceCollection): void | Promise<void>;
+	onStarting?(services: ServiceProvider): void | Promise<void>;
+	onStopping?(services: ServiceProvider): void | Promise<void>;
 }

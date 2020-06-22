@@ -2,7 +2,7 @@ import { State } from './state';
 import { Route } from './route';
 import { NoopRoutable, Routable } from './routable';
 import { PromiseCompletitionSource, executeProvider, Newable } from '../tools';
-import { Container, inject, ContainerTag } from '../ioc';
+import { ServiceProvider, Injectable, ServiceProviderTag } from '../ioc';
 import { DiagnosticsServiceTag, DiagnosticsService } from '../diagnostics';
 import { StackinoDueConfiguration } from '../config';
 
@@ -33,12 +33,9 @@ export interface Transition {
 /**
  * Represents single lifecycle of a transition.
  */
-export class TransitionController implements Transition {
-	@inject(ContainerTag)
-	private readonly container!: Container;
-
-	@inject(DiagnosticsServiceTag)
-	private readonly diagnosticsService!: DiagnosticsService;
+export class TransitionController extends Injectable implements Transition {
+	private readonly serviceProvider = this.$dependency(ServiceProviderTag);
+	private readonly diagnosticsService = this.$dependency(DiagnosticsServiceTag);
 
 	constructor(
 		readonly id: string,
@@ -47,6 +44,7 @@ export class TransitionController implements Transition {
 		readonly toParams: ReadonlyMap<string, string>,
 		readonly toData: ReadonlyMap<string | symbol, unknown>
 	) {
+		super();
 	}
 
 	private async createEnteringState(route: Route): Promise<State> {
@@ -63,7 +61,7 @@ export class TransitionController implements Transition {
 			Page = NoopRoutable;
 		}
 
-		const page = this.container.instantiate(Page);
+		const page = this.serviceProvider.createFromClass(Page);
 
 		return new State(route, page, async (setCommitAction) => {
 			if (page.onEntering) {

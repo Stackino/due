@@ -1,4 +1,4 @@
-import { Constructed, DefaultContainer, ContainerTag, inject, injectable, RouteRegistry, pathCombine, Route, Router, RouterHandler, RouterHandlerFactory, RouterHandlerFactoryTag, RouteRegistryTag, RouterTag, Transition, TransitionController } from '@stackino/due';
+import { RouteRegistry, pathCombine, Route, Router, RouterHandler, RouterHandlerFactory, RouterHandlerFactoryTag, RouteRegistryTag, RouterTag, Transition, TransitionController, Injectable, ServiceProviderTag } from '@stackino/due';
 import { createRouter as createRouter5, NavigationOptions as NavigationOptions5, Plugin as Plugin5, Route as Route5, Router as Router5, State as State5 } from 'router5';
 import browserPlugin from 'router5-plugin-browser';
 import { DefaultDependencies as Dependencies5 } from 'router5/dist/types/router';
@@ -44,19 +44,18 @@ function paramsToParams5(params: ReadonlyMap<string, string>, data?: ReadonlyMap
 	return params5;
 }
 
-export class Router5RouterHandler implements RouterHandler {
-	@inject(RouterTag)
-	private router!: Router;
+export class Router5RouterHandler extends Injectable implements RouterHandler {
+	private router = this.$dependency(RouterTag);
 
 	constructor(
 		private readonly router5: Router5,
 		private readonly aliasToName: Map<string, string>,
 		private readonly nameToAlias: Map<string, string>
 	) {
-		this.router5 = router5;
-	}
+		super();
 
-	[Constructed] = (): void => {
+		this.router5 = router5;
+
 		this.router5.useMiddleware(() => async (toState, fromState) => {
 			const transition = (toState as any)[StackinoTransitionKey] as unknown;
 			if (!(transition instanceof TransitionController)) {
@@ -195,13 +194,9 @@ export class Router5RouterHandler implements RouterHandler {
 	}
 }
 
-@injectable(RouterHandlerFactoryTag)
-export class Router5RouterHandlerFactory implements RouterHandlerFactory {
-	@inject(ContainerTag)
-	private container!: DefaultContainer;
-
-	@inject(RouteRegistryTag)
-	private routeRegistry!: RouteRegistry;
+export class Router5RouterHandlerFactory extends Injectable implements RouterHandlerFactory {
+	private serviceProvider = this.$dependency(ServiceProviderTag);
+	private routeRegistry = this.$dependency(RouteRegistryTag);
 
 	async create(main: boolean): Promise<RouterHandler> {
 		const aliasToName = new Map<string, string>();
@@ -286,7 +281,7 @@ export class Router5RouterHandlerFactory implements RouterHandlerFactory {
 			router.usePlugin(browserPlugin({}));
 		}
 
-		const handler = this.container.instantiate(Router5RouterHandler, router, aliasToName, nameToAlias);
+		const handler = this.serviceProvider.createFromClass(Router5RouterHandler, router, aliasToName, nameToAlias);
 
 		return handler;
 	}

@@ -1,4 +1,4 @@
-import { ContainerTag, Container, inject, injectable, RenderService, Portal, RenderServiceTag, RootPage, Tag, Transition, getUid } from '@stackino/due';
+import { RenderService, Portal, RenderServiceTag, RootPage, Tag, Transition, getUid, ServiceProvider, Injectable, ServiceProviderTag } from '@stackino/due';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { ReactPage } from './react-page';
@@ -31,7 +31,7 @@ function createPageElement(pageContext: PageContext): React.ReactElement<any> {
 	</RenderContextContext.Provider>;
 }
 
-function createPortalElements(container: Container, roots: Map<Portal<unknown, unknown>, HTMLDivElement>, portals: readonly Portal<unknown, unknown>[]): React.ReactPortal[] {
+function createPortalElements(serviceProvider: ServiceProvider, roots: Map<Portal<unknown, unknown>, HTMLDivElement>, portals: readonly Portal<unknown, unknown>[]): React.ReactPortal[] {
 	for (const portal of roots.keys()) {
 		if (portals.indexOf(portal) !== -1) {
 			continue;
@@ -72,7 +72,7 @@ function createPortalElements(container: Container, roots: Map<Portal<unknown, u
 		// todo: this should be cached probably
 		const nextPortalContext: PortalContext = {
 			kind: 'portal',
-			container: container,
+			serviceProvider: serviceProvider,
 		};
 
 		result.push(ReactDOM.createPortal(<RenderContextContext.Provider value={nextPortalContext}>
@@ -98,7 +98,7 @@ export const View: React.FunctionComponent<ViewProps> = (props): React.ReactElem
 
 	const nextPageContext: PageContext = {
 		kind: 'page',
-		container: pageContext.container,
+		serviceProvider: pageContext.serviceProvider,
 		transition: pageContext.transition,
 		index: pageContext.index + 1,
 	};
@@ -115,13 +115,10 @@ export interface ReactRenderServiceOptions {
 	output: HTMLElement | ((html: string) => void);
 }
 
-@injectable(RenderServiceTag)
-export class ReactRenderService implements RenderService {
-	@inject(ContainerTag)
-	private container!: Container;
+export class ReactRenderService extends Injectable implements RenderService {
 
-	@inject(ReactRenderServiceOptionsTag)
-	private options!: ReactRenderServiceOptions;
+	private serviceProvider = this.$dependency(ServiceProviderTag);
+	private options = this.$dependency(ReactRenderServiceOptionsTag);
 
 	private portalRoots: Map<Portal<unknown, unknown>, HTMLDivElement> = new Map();
 
@@ -158,14 +155,14 @@ export class ReactRenderService implements RenderService {
 		} else {
 			rootPageContext = this.rootPageContext = {
 				kind: 'page',
-				container: this.container,
+				serviceProvider: this.serviceProvider,
 				transition,
 				index: 1,
 			};
 		}
 
 		const rootViewElement = createPageElement(rootPageContext);
-		const portalElements = createPortalElements(this.container, this.portalRoots, portals);
+		const portalElements = createPortalElements(this.serviceProvider, this.portalRoots, portals);
 
 		const appElement = <>
 			{rootViewElement}

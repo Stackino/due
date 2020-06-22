@@ -1,4 +1,4 @@
-import { delay, Container, Plugin, Tag } from '@stackino/due-preset-react';
+import { delay, Plugin, Tag, ServiceCollection } from '@stackino/due-preset-react';
 import { RpcClient } from '@odachi/rpc-client';
 
 export const RpcClientTag = new Tag<RpcClient>('Odachi RpcClient');
@@ -15,8 +15,8 @@ export class OdachiRpcClientPlugin implements Plugin {
 
 	private options: OdachiRpcClientPluginOptions;
 
-	configureServices(container: Container): void {
-		container.bindConstantValue(RpcClientTag, (() => {
+	configureServices(services: ServiceCollection): void {
+		services.bind(RpcClientTag).toFactory(() => {
 			const client = new RpcClient(this.options.endpoint);
 
 			if (this.options.simulatedLatency) {
@@ -32,6 +32,6 @@ export class OdachiRpcClientPlugin implements Plugin {
 			}
 
 			return client;
-		})());
+		}).inSingletonLifetime();
 	}
 }

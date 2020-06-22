@@ -1,4 +1,4 @@
-import { inject, injectable, Tag } from '../ioc';
+import { Tag, Injectable } from '../ioc';
 import { RenderService, RenderServiceTag } from '../rendering';
 import { Portal, Router, RouterTag, Transition } from '../routing';
 import { reaction, comparer, IReactionDisposer } from 'mobx';
@@ -10,13 +10,9 @@ export interface ViewService {
 	stop(): Promise<void>;
 }
 
-@injectable(ViewServiceTag)
-export class DefaultViewService implements ViewService {
-	@inject(RouterTag)
-	private readonly router!: Router;
-
-	@inject(RenderServiceTag)
-	private readonly renderService!: RenderService;
+export class DefaultViewService extends Injectable implements ViewService {
+	private readonly router = this.$dependency(RouterTag);
+	private readonly renderService = this.$dependency(RenderServiceTag);
 
 	private subscription: IReactionDisposer | null = null;
 

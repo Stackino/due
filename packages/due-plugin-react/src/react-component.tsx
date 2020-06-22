@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { observable, runInAction } from 'mobx';
 import { useDependency } from './hooks';
-import { ContainerTag, Composable } from '@stackino/due';
+import { Composable, ServiceProviderTag } from '@stackino/due';
 import { createObservedTemplate } from './internal/tools';
 
 export abstract class ReactComponent<TProps> extends Composable {
@@ -26,13 +26,13 @@ export function connectReactComponent<TReactComponent extends ReactComponent<TPr
 	}
 
 	const connector: React.FunctionComponent<TProps> = (props: TProps) => {
-		const container = useDependency(ContainerTag);
+		const serviceProvider = useDependency(ServiceProviderTag);
 		const instanceRef = React.useRef<TReactComponent | null>(null);
 
 		let instance = instanceRef.current;
 
 		if (!instance) {
-			instance = container.instantiate(reactComponent, props);
+			instance = serviceProvider.createFromClass(reactComponent, props);
 
 			if (!instance.template.displayName) {
 				instance.template.displayName = underlyingName;

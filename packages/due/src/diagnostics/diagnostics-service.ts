@@ -1,4 +1,4 @@
-import { injectable, Tag } from '../ioc';
+import { Tag, Injectable } from '../ioc';
 
 export const DiagnosticsServiceTag = new Tag<DiagnosticsService>('Stackino diagnostics service');
 
@@ -11,8 +11,7 @@ export interface DiagnosticsService {
 	stop(): Promise<void>;
 }
 
-@injectable(DiagnosticsServiceTag)
-export class DefaultDiagnosticsService implements DiagnosticsService {
+export class DefaultDiagnosticsService extends Injectable implements DiagnosticsService {
 	start(): Promise<void> {
 		return Promise.resolve();
 	}

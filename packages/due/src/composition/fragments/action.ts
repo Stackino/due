@@ -1,6 +1,6 @@
 import { createAtom } from 'mobx';
 import { DiagnosticsServiceTag } from '../../diagnostics';
-import { Container, ContainerKey } from '../../ioc';
+import { Injectable, ServiceProvider } from '../../ioc';
 
 const trace = false;
 
@@ -36,7 +36,7 @@ function isAsyncIterableIterator<T>(obj: T): obj is Extract<T, AsyncIterableIter
 		typeof (obj as any)[Symbol.asyncIterator] === 'function';
 }
 
-export function action<TSelf, TFlow extends ActionFlow<TSelf>>(self: TSelf, action: TFlow): Action<TSelf, TFlow> {
+export function action<TSelf, TFlow extends ActionFlow<TSelf>>(self: TSelf, serviceProvider: ServiceProvider, action: TFlow): Action<TSelf, TFlow> {
 	const runningAtom = createAtom('Action \'running\'');
 	let runningCounter = 0;
 	let idCounter = 0;
@@ -121,12 +121,8 @@ export function action<TSelf, TFlow extends ActionFlow<TSelf>>(self: TSelf, acti
 				console.info(`action ${id} failed`, error);
 			}
 
-			const container = (self as any)[ContainerKey] as Container;
-			if (container) {
-				const diagnosticsService = container.get(DiagnosticsServiceTag);
-
-				diagnosticsService.error(error);
-			}
+			const diagnosticsService = serviceProvider.get(DiagnosticsServiceTag);
+			diagnosticsService.error(error);
 		} finally {
 			runningCounter--;
 			runningAtom.reportChanged();

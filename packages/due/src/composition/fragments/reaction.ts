@@ -1,5 +1,6 @@
 import { createAtom, reaction as mobxReaction, IReactionDisposer } from 'mobx';
 import { action, Action, ActionFlowResult } from './action';
+import { ServiceProvider } from '../../ioc';
 
 export interface Reaction<TSelf, TData> {
 	/**
@@ -20,12 +21,12 @@ export interface Reaction<TSelf, TData> {
 	disable(): void;
 }
 
-export function reaction<TSelf, TData>(self: TSelf, expression: () => TData, handler: (data: TData) => ActionFlowResult): Reaction<TSelf, TData> {
+export function reaction<TSelf, TData>(self: TSelf, serviceProvider: ServiceProvider, expression: () => TData, handler: (data: TData) => ActionFlowResult): Reaction<TSelf, TData> {
 	const enabledAtom = createAtom('Reaction \'enabled\'');
 	let disposer: IReactionDisposer | null = null;
 
 	return {
-		action: action(self, handler),
+		action: action(self, serviceProvider, handler),
 		get running() { return this.action.running; },
 		get enabled() { return !!disposer; },
 

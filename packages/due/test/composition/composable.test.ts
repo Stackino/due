@@ -1,7 +1,7 @@
 import 'jest';
 import 'reflect-metadata';
 import { RouteBuilder } from '../../src/routing/route-builder';
-import { RootRouteDeclaration, RootPage, Routable, Route, DefaultRouteRegistry, DefaultContainer, DiagnosticsServiceTag, DefaultDiagnosticsService, BindingScope, ContainerTag, RouteRegistry, Container, LayoutRouteDeclaration, PageRouteDeclaration, Composable, delay } from '../../src';
+import { RootRouteDeclaration, RootPage, Routable, Route, DefaultRouteRegistry, DiagnosticsServiceTag, DefaultDiagnosticsService, LayoutRouteDeclaration, PageRouteDeclaration, Composable, delay, ServiceProvider, ServiceCollection } from '../../src';
 import { observable, runInAction } from 'mobx';
 
 class MockComposable extends Composable {
@@ -21,18 +21,19 @@ class MockComposable extends Composable {
 
 }
 
-async function setup(): Promise<[Container]> {
-	const container = new DefaultContainer();
-	container.bindConstantValue(ContainerTag, container);
-	container.bind(DiagnosticsServiceTag, DefaultDiagnosticsService, BindingScope.singleton);
+async function setup(): Promise<[ServiceProvider]> {
+	const serviceCollection = new ServiceCollection();
+	serviceCollection.bind(DiagnosticsServiceTag).toClass(DefaultDiagnosticsService).inSingletonLifetime();
 
-	return [container];
+	const serviceProvider = serviceCollection.build();
+
+	return [serviceProvider];
 }
 
 test('timer is disabled by default', async () => {
-	const [container] = await setup();
+	const [serviceProvider] = await setup();
 
-	const composable = container.instantiate(MockComposable);
+	const composable = serviceProvider.createFromClass(MockComposable);
 	expect(composable.timer.enabled).toBe(false);
 	expect(composable.timer.running).toBe(false);
 
@@ -40,9 +41,9 @@ test('timer is disabled by default', async () => {
 });
 
 test('timer is ticking', async () => {
-	const [container] = await setup();
+	const [serviceProvider] = await setup();
 
-	const composable = container.instantiate(MockComposable);
+	const composable = serviceProvider.createFromClass(MockComposable);
 	expect(composable.timer.enabled).toBe(false);
 	expect(composable.timer.running).toBe(false);
 
@@ -62,9 +63,9 @@ test('timer is ticking', async () => {
 });
 
 test('reaction is disabled by default', async () => {
-	const [container] = await setup();
+	const [serviceProvider] = await setup();
 
-	const composable = container.instantiate(MockComposable);
+	const composable = serviceProvider.createFromClass(MockComposable);
 	expect(composable.reaction.enabled).toBe(false);
 	expect(composable.reaction.running).toBe(false);
 
@@ -72,9 +73,9 @@ test('reaction is disabled by default', async () => {
 });
 
 test('reaction is reacting', async () => {
-	const [container] = await setup();
+	const [serviceProvider] = await setup();
 
-	const composable = container.instantiate(MockComposable);
+	const composable = serviceProvider.createFromClass(MockComposable);
 	expect(composable.reaction.enabled).toBe(false);
 	expect(composable.reaction.running).toBe(false);
 

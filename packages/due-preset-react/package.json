@@ -24,7 +24,6 @@
     "tslib": "^2.0.0"
   },
   "peerDependencies": {
-    "inversify": "^5.0.0",
     "mobx": "^4.9.0 || ^5.9.0",
     "reflect-metadata": "^0.1.0"
   },

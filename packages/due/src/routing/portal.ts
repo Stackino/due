@@ -1,16 +1,16 @@
-import { Container } from '../ioc';
+import { ServiceProvider } from '../ioc';
 import { Composable } from '../composition';
 import { PromiseCompletitionSource } from '../tools';
 import { observable, when } from 'mobx';
 
 export class PortalLifecycle {
 	constructor(
-		container: Container,
+		serviceProvider: ServiceProvider,
 		portalClass: new (controller: PortalController<unknown, unknown>) => Portal<unknown, unknown>,
 		private input: unknown
 	) {
-		this.controller = container.instantiate(PortalController, this, input);
-		this.instance = container.instantiate(portalClass, this.controller);
+		this.controller = serviceProvider.createFromClass(PortalController, this, input);
+		this.instance = serviceProvider.createFromClass(portalClass, this.controller);
 	}
 
 	readonly controller: PortalController<unknown, unknown>;

@@ -1,4 +1,4 @@
-import { Container, ContainerTag, inject, injectable, Tag } from '../ioc';
+import { Tag, Injectable, ServiceProviderTag } from '../ioc';
 import { buildRoute, Route } from './route';
 import { RootRouteDeclaration, RouteDeclaration } from './route-declaration';
 
@@ -19,11 +19,7 @@ export interface RouteRegistry {
 	stop(): Promise<void>;
 }
 
-@injectable(RouteRegistryTag)
 export class DefaultRouteRegistry implements RouteRegistry {
-
-	@inject(ContainerTag)
-	private container!: Container;
 
 	private _root: Route | null = null;
 	get root(): Route {

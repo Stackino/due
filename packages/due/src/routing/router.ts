@@ -1,4 +1,4 @@
-import { Tag, injectable, inject, ContainerTag, Container } from '../ioc';
+import { Tag, Injectable, ServiceProviderTag } from '../ioc';
 import { Transition, TransitionController, TransitionStatus } from './transition';
 import { Route } from './route';
 import { Portal, PortalController, PortalLifecycle } from './portal';
@@ -108,16 +108,10 @@ export interface Router {
 	stop(): Promise<void>;
 }
 
-@injectable(RouterTag)
-export class DefaultRouter implements Router {
-	@inject(ContainerTag)
-	private readonly container!: Container;
-
-	@inject(RouteRegistryTag)
-	private readonly routeRegistry!: RouteRegistry;
-
-	@inject(RouterHandlerFactoryTag)
-	private readonly routerHandlerFactory!: RouterHandlerFactory;
+export class DefaultRouter extends Injectable implements Router {
+	private readonly serviceProvider = this.$dependency(ServiceProviderTag);
+	private readonly routeRegistry = this.$dependency(RouteRegistryTag);
+	private readonly routerHandlerFactory = this.$dependency(RouterHandlerFactoryTag);
 
 	private handler: RouterHandler | null = null;
 
@@ -151,7 +145,7 @@ export class DefaultRouter implements Router {
 
 		const transitionId = this._latestTransitionId = `${_transitionCounter++}`;
 
-		const transition = this.container.instantiate(TransitionController, transitionId, from, to, toParams, toData);
+		const transition = this.serviceProvider.createFromClass(TransitionController, transitionId, from, to, toParams, toData);
 
 		const nextPendingTransitions = this.pendingTransitions.slice();
 		nextPendingTransitions.push(transition);
@@ -308,7 +302,7 @@ export class DefaultRouter implements Router {
 			throw new Error('Attempt to use stopped router');
 		}
 
-		const lifecycle = new PortalLifecycle(this.container, portalClass as any /* todo: can we make this safer? */, input);
+		const lifecycle = new PortalLifecycle(this.serviceProvider, portalClass as any /* todo: can we make this safer? */, input);
 		this.portalLifecycles.set(lifecycle.instance, lifecycle);
 
 		const nextPortals: Portal<unknown, unknown>[] = [];

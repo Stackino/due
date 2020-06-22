@@ -1,5 +1,6 @@
 import { createAtom } from 'mobx';
 import { action, Action, ActionFlowResult } from './action';
+import { ServiceProvider } from '../../ioc';
 
 export interface Timer<TSelf> {
 	/**
@@ -20,14 +21,14 @@ export interface Timer<TSelf> {
 	disable(): void;
 }
 
-export function timer<TSelf>(self: TSelf, timeout: number, handler: () => ActionFlowResult): Timer<TSelf> {
+export function timer<TSelf>(self: TSelf, serviceProvider: ServiceProvider, timeout: number, handler: () => ActionFlowResult): Timer<TSelf> {
 	const enabledAtom = createAtom('Timer \'enabled\'');
 
 	// nodejs and browsers have different interfaces (number vs object) for representing timer handlers
 	let interval: any = null;
 
 	return {
-		action: action(self, handler),
+		action: action(self, serviceProvider, handler),
 		get running() { return this.action.running; },
 		get enabled() { return interval !== null; },
 

@@ -10,7 +10,6 @@ Opinionated way of building web applications.
 * eslint, typescript-eslint
 * react
 * mobx
-* inversify
 * reflect-metadata
 
 ## Plugins

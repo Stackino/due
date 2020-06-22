@@ -35,5 +35,5 @@ export function usePortalContext(): PortalContext {
 export function useDependency<T>(tag: Tag<T>): T {
 	const context = useRenderContext();
 
-	return context.container.get(tag);
+	return context.serviceProvider.get(tag);
 }

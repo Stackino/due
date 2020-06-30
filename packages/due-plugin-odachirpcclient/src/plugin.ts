@@ -8,8 +8,10 @@ interface OdachiRpcClientPluginOptions {
 	simulatedLatency?: number | [number, number];
 }
 
-export class OdachiRpcClientPlugin implements Plugin {
+export class OdachiRpcClientPlugin extends Plugin {
 	constructor(options: OdachiRpcClientPluginOptions) {
+		super();
+
 		this.options = options;
 	}
 

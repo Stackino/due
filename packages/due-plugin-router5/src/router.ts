@@ -3,6 +3,7 @@ import { createRouter as createRouter5, NavigationOptions as NavigationOptions5,
 import browserPlugin from 'router5-plugin-browser';
 import { DefaultDependencies as Dependencies5 } from 'router5/dist/types/router';
 import { Params as Params5 } from 'router5/dist/types/base';
+import { Router5PluginOptionsTag } from './plugin-options';
 
 const DATA_MAGIC = "~due~routing~data";
 const StackinoTransitionKey = Symbol('Stackino transition');
@@ -197,6 +198,7 @@ export class Router5RouterHandler extends Injectable implements RouterHandler {
 export class Router5RouterHandlerFactory extends Injectable implements RouterHandlerFactory {
 	private serviceProvider = this.$dependency(ServiceProviderTag);
 	private routeRegistry = this.$dependency(RouteRegistryTag);
+	private options = this.$dependency(Router5PluginOptionsTag);
 
 	async create(main: boolean): Promise<RouterHandler> {
 		const aliasToName = new Map<string, string>();
@@ -278,7 +280,9 @@ export class Router5RouterHandlerFactory extends Injectable implements RouterHan
 			trailingSlashMode: 'never',
 		});
 		if (main) {
-			router.usePlugin(browserPlugin({}));
+			router.usePlugin(browserPlugin({
+				base: this.options.base,
+			}));
 		}
 
 		const handler = this.serviceProvider.createFromClass(Router5RouterHandler, router, aliasToName, nameToAlias);

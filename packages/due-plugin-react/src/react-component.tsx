@@ -4,7 +4,8 @@ import { useDependency } from './hooks';
 import { Composable, ServiceProviderTag } from '@stackino/due';
 import { createObservedTemplate } from './internal/tools';
 
-export abstract class ReactComponent<TProps> extends Composable {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export abstract class ReactComponent<TProps = {}> extends Composable {
 	constructor(props: TProps) {
 		super();
 

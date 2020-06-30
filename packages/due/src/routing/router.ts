@@ -291,8 +291,10 @@ export class DefaultRouter extends Injectable implements Router {
 		return this.portalsValue.get();
 	}
 
-	async portal<TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => Portal<TInput, TOutput>, input: TInput): Promise<TOutput | null> {
-		const portal = await this.openPortal(portalClass, input);
+	portal<TOutput>(portalClass: new (controller: PortalController<void, TOutput>) => Portal<void, TOutput>): Promise<TOutput | null>;
+	portal<TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => Portal<TInput, TOutput>, input: TInput): Promise<TOutput | null>;
+	async portal<TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => Portal<TInput, TOutput>, input?: TInput): Promise<TOutput | null> {
+		const portal = await this.openPortal(portalClass, input as TInput);
 
 		return this.waitForPortal(portal as Portal<unknown, TOutput>);
 	}

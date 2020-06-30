@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due-plugin-odachirpcclient",
-  "version": "0.1.38",
+  "version": "0.1.39",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",

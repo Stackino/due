@@ -1,4 +1,5 @@
 export * from './constants';
+export * from './route-params';
 export * from './portal';
 export * from './routable';
 export * from './route';

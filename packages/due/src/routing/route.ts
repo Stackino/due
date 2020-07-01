@@ -1,6 +1,7 @@
 import { executeProvider, pathCombine, Provider } from '../tools';
 import { RouteDeclaration, LayoutRouteDeclaration, RootRouteDeclaration } from './route-declaration';
 import { Path } from 'path-parser';
+import { RouteDefaultValue } from './route-params';
 
 export class Route {
 	constructor(
@@ -9,8 +10,10 @@ export class Route {
 		readonly name: string | null,
 		readonly path: string | null,
 		readonly params: string[],
+		readonly defaults: ReadonlyMap<string, RouteDefaultValue>,
 		readonly fullPath: string | null,
 		readonly fullParams: string[],
+		readonly fullDefaults: ReadonlyMap<string, RouteDefaultValue>,
 		readonly parent: Route | null,
 		readonly children: readonly Route[]
 	) {
@@ -177,6 +180,22 @@ function buildRouteFullParams(route: RouteDeclaration, parent: Route | null): st
 	return result;
 }
 
+function buildRouteFullDefaults(route: RouteDeclaration, parent: Route | null): ReadonlyMap<string, RouteDefaultValue> {
+	const result = new Map<string, RouteDefaultValue>();
+
+	if (parent) {
+		for (const [key, value] of parent.fullDefaults) {
+			result.set(key, value);
+		}
+	}
+
+	for (const [key, value] of route.defaults) {
+		result.set(key, value);
+	}
+
+	return result;
+}
+
 /* eslint-disable @typescript-eslint/no-use-before-define */
 export async function buildRoute(declaration: RouteDeclaration, id: string, parent: Route | null = null): Promise<Route> {
 	const uid = parent ? `${parent.id}.${id}` : id;
@@ -185,8 +204,9 @@ export async function buildRoute(declaration: RouteDeclaration, id: string, pare
 	const params = buildRouteParams(declaration);
 	const fullPath = buildFullRoutePath(declaration, parent);
 	const fullParams = buildRouteFullParams(declaration, parent);
+	const fullDefaults = buildRouteFullDefaults(declaration, parent);
 	const children: Route[] = [];
-	const route = new Route(declaration, uid, name, path, params, fullPath, fullParams, parent, children);
+	const route = new Route(declaration, uid, name, path, params, declaration.defaults, fullPath, fullParams, fullDefaults, parent, children);
 
 	if (declaration instanceof RootRouteDeclaration || declaration instanceof LayoutRouteDeclaration) {
 		const childRoutes = await buildRoutes(declaration.children, route);

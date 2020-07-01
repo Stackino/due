@@ -1,7 +1,6 @@
 import 'jest';
 import 'reflect-metadata';
-import { RouteBuilder } from '../../src/routing/route-builder';
-import { RootRouteDeclaration, RootPage, Routable, Route, DefaultRouteRegistry, DiagnosticsServiceTag, DefaultDiagnosticsService, LayoutRouteDeclaration, PageRouteDeclaration, Composable, delay, ServiceProvider, ServiceCollection } from '../../src';
+import { DiagnosticsServiceTag, DefaultDiagnosticsService, LayoutRouteDeclaration, PageRouteDeclaration, Composable, delay, ServiceProvider, ServiceCollection } from '../../src';
 import { observable, runInAction } from 'mobx';
 
 class MockComposable extends Composable {

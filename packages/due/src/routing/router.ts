@@ -5,6 +5,7 @@ import { Portal, PortalController, PortalLifecycle } from './portal';
 import { RouteRegistryTag, RouteRegistry, RouteDeclaration, State } from '.';
 import { PromiseCompletitionSource, executeProvider } from '..';
 import { observable, when } from 'mobx';
+import { RouteParams, RouteData, normalizeRouteParams, normalizeRouteData, normalizeOptionalRouteParams, normalizeOptionalRouteData, applyRouteDefaults } from './route-params';
 
 export const RouterHandlerFactoryTag = new Tag<RouterHandlerFactory>('Stackino router handler factory');
 export const RouterTag = new Tag<Router>('Stackino router');
@@ -28,51 +29,6 @@ export interface RouterHandlerFactory {
 	 * @param main Whether requested router is to be used as main router. Main router handles browser urls whereas subrouters are controlled only programatically.
 	 */
 	create(main: boolean): Promise<RouterHandler>;
-}
-
-export type RouteParams = { readonly [key: string]: string } | ReadonlyMap<string, string>;
-export type RouteData = { readonly [key: string]: string } | ReadonlyMap<string | symbol, unknown>;
-
-export function normalizeRouteParams(params: RouteParams): ReadonlyMap<string, string> {
-	if (params instanceof Map) {
-		return params;
-	}
-	
-	const result = new Map<string, string>();
-
-	for (const [k, v] of Object.entries(params)) {
-		result.set(k, v);
-	}
-
-	return result;
-}
-export function normalizeOptionalRouteParams(params?: RouteParams): ReadonlyMap<string, string> | undefined {
-	if (!params) {
-		return undefined;
-	}
-
-	return normalizeRouteParams(params);
-}
-
-export function normalizeRouteData(data: RouteData): ReadonlyMap<string | symbol, unknown> {
-	if (data instanceof Map) {
-		return data;
-	}
-
-	const result = new Map<string, string>();
-
-	for (const [k, v] of Object.entries(data)) {
-		result.set(k, v);
-	}
-
-	return result;
-}
-export function normalizeOptionalRouteData(data?: RouteData): ReadonlyMap<string | symbol, unknown> | undefined {
-	if (!data) {
-		return undefined;
-	}
-
-	return normalizeRouteData(data);
 }
 
 export interface Router {
@@ -227,7 +183,8 @@ export class DefaultRouter extends Injectable implements Router {
 			throw new Error(`Route '${route.id}' is not navigable`);
 		}
 
-		const normalizedParams = normalizeOptionalRouteParams(params);
+		const normalizedParams = normalizeOptionalRouteParams(params) || new Map();
+		applyRouteDefaults(this.activeTransition, normalizedParams, route.fullDefaults);
 
 		return this.handler.pathFor(route, normalizedParams);
 	}
@@ -257,7 +214,9 @@ export class DefaultRouter extends Injectable implements Router {
 			throw new Error('Attempt to use stopped router');
 		}
 
-		const normalizedParams = normalizeOptionalRouteParams(params);
+		const normalizedParams = normalizeOptionalRouteParams(params) || new Map();
+		applyRouteDefaults(this.activeTransition, normalizedParams, route.fullDefaults);
+
 		const normalizedData = normalizeOptionalRouteData(data);
 
 		return this.handler.goTo(route, normalizedParams, normalizedData);

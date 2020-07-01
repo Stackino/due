@@ -2,7 +2,7 @@ import 'jest';
 import 'reflect-metadata';
 import { RouteBuilder } from '../../src/routing/route-builder';
 import { TransitionController, TransitionStatus } from '../../src/routing/transition';
-import { RootRouteDeclaration, RootPage, Routable, Route, DefaultRouteRegistry, ServiceCollection, DiagnosticsServiceTag, DefaultDiagnosticsService, RouteRegistry, LayoutRouteDeclaration, PageRouteDeclaration, ServiceProvider } from '../../src';
+import { RootRouteDeclaration, RootPage, Routable, Route, DefaultRouteRegistry, ServiceCollection, DiagnosticsServiceTag, DefaultDiagnosticsService, RouteRegistry, LayoutRouteDeclaration, PageRouteDeclaration, ServiceProvider, Inherit } from '../../src';
 
 class MockRoutable extends Routable {
 }
@@ -19,10 +19,10 @@ async function setup(): Promise<[ServiceProvider, RouteRegistry]> {
 				.page('detail', '/:productId', () => MockRoutable)
 			)
 			// product management per tenant (alternative syntaxe)
-			.layout({ name: 'portal', url: '/portal/:tenantId', page: () => MockRoutable }, builder => builder
-				.layout({ name: 'products', url: '/products', page: () => MockRoutable }, builder => builder
-					.page({ name: 'list', url: '/', page: () => MockRoutable })
-					.page({ name: 'detail', url: '/:productId', page: () => MockRoutable })
+			.layout({ name: 'portal', path: '/portal/:tenantId', defaults: { 'tenantId': Inherit }, page: () => MockRoutable }, builder => builder
+				.layout({ name: 'products', path: '/products', page: () => MockRoutable }, builder => builder
+					.page({ name: 'list', path: '/', page: () => MockRoutable })
+					.page({ name: 'detail', path: '/:productId', page: () => MockRoutable })
 				)
 			)
 			.build(parent)

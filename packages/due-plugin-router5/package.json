@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due-plugin-router5",
-  "version": "0.2.0",
+  "version": "0.2.4",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",
@@ -23,7 +23,7 @@
     "router5-plugin-browser": "8.0.1"
   },
   "peerDependencies": {
-    "@stackino/due": "0.1.x",
+    "@stackino/due": "0.2.x",
     "mobx": "^4.9.0 || ^5.9.0"
   },
   "devDependencies": {

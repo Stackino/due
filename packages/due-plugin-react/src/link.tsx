@@ -1,8 +1,9 @@
 import { RouteParams, RouteData, RouterTag } from '@stackino/due';
 import * as classNames from 'classnames';
 import * as React from 'react';
-import { useDependency } from './hooks';
+import { useDependency, usePageContext, useRenderContext } from './hooks';
 import { observer } from 'mobx-react-lite';
+import { render } from 'react-dom';
 
 export interface LinkProps {
 	variant?: 'a' | 'li + a';
@@ -20,6 +21,7 @@ export interface LinkProps {
 }
 
 export const Link: React.FunctionComponent<LinkProps> = observer(function ({ variant = 'a', to, params, data, activeName, activeParams, id, style, className, activeClassName = 'active', children }) {
+	const renderContext = useRenderContext();
 	const router = useDependency(RouterTag);
 	const handleClick = React.useCallback((event: React.MouseEvent) => {
 		event.preventDefault();
@@ -28,9 +30,11 @@ export const Link: React.FunctionComponent<LinkProps> = observer(function ({ var
 		router.goToName(to, params, data);
 	}, [router, to, params]);
 
-	const href = router.pathForName(to, params);
-	const isActive = router.isActiveName(activeName ?? to, activeParams ?? params);
-	const computedClassName = classNames(className, isActive && activeClassName);
+	const transition = renderContext.kind === 'page' ? renderContext.transition : router.activeTransition;
+
+	const href = router.pathForName(to, params, transition);
+	const isActive = router.isActiveName(activeName ?? to, activeParams ?? params, transition);
+	const computedClassName = classNames(className, isActive && activeClassName, transition);
 
 	if (variant === 'a') {
 		return <a

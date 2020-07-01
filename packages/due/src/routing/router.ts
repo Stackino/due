@@ -44,17 +44,17 @@ export interface Router {
 	createTransitionToId(from: Transition | null, toId: string, toParams: RouteParams, toData: RouteData): TransitionController;
 	createTransitionToName(from: Transition | null, toName: string, toParams: RouteParams, toData: RouteData): TransitionController;
 
-	isActive(route: Route, params?: RouteParams): boolean;
-	isActiveId(id: string, params?: RouteParams): boolean;
-	isActiveName(name: string, params?: RouteParams): boolean;
+	isActive(route: Route, params?: RouteParams, transition?: Transition | null): boolean;
+	isActiveId(id: string, params?: RouteParams, transition?: Transition | null): boolean;
+	isActiveName(name: string, params?: RouteParams, transition?: Transition | null): boolean;
 
-	pathFor(route: Route, params?: RouteParams): string;
-	pathForId(id: string, params?: RouteParams): string;
-	pathForName(name: string, params?: RouteParams): string;
+	pathFor(route: Route, params?: RouteParams, transition?: Transition | null): string;
+	pathForId(id: string, params?: RouteParams, transition?: Transition | null): string;
+	pathForName(name: string, params?: RouteParams, transition?: Transition | null): string;
 
-	goTo(route: Route, params?: RouteParams, data?: RouteData): void;
-	goToId(id: string, params?: RouteParams, data?: RouteData): void;
-	goToName(name: string, params?: RouteParams, data?: RouteData): void;
+	goTo(route: Route, params?: RouteParams, data?: RouteData, transition?: Transition | null): void;
+	goToId(id: string, params?: RouteParams, data?: RouteData, transition?: Transition | null): void;
+	goToName(name: string, params?: RouteParams, data?: RouteData, transition?: Transition | null): void;
 
 	portal<TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => Portal<TInput, TOutput>, input: TInput): Promise<TOutput | null>;
 	openPortal<TPortal extends Portal<TInput, TOutput>, TInput, TOutput>(portalClass: new (controller: PortalController<TInput, TOutput>) => TPortal, input: TInput): Promise<TPortal>;
@@ -139,42 +139,42 @@ export class DefaultRouter extends Injectable implements Router {
 		return this.createTransition(from, to, toParams, toData);
 	}
 
-	isActive(route: Route, params?: RouteParams): boolean {
+	isActive(route: Route, params?: RouteParams, transition?: Transition | null): boolean {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
 
-		const transition = this.activeTransition;
-		if (!transition) {
+		const actualTransition = transition ?? this.activeTransition;
+		if (!actualTransition) {
 			return false;
 		}
 
 		const normalizedParams = normalizeOptionalRouteParams(params);
 
-		return transition.active.findIndex(s => Route.equals(s.route, transition.toParams, route, normalizedParams)) !== -1;
+		return actualTransition.active.findIndex(s => Route.equals(s.route, actualTransition.toParams, route, normalizedParams)) !== -1;
 	}
 
-	isActiveId(id: string, params?: RouteParams): boolean {
+	isActiveId(id: string, params?: RouteParams, transition?: Transition | null): boolean {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
 
 		const route = this.routeRegistry.getById(id);
 
-		return this.isActive(route, params);
+		return this.isActive(route, params, transition);
 	}
 
-	isActiveName(name: string, params?: RouteParams): boolean {
+	isActiveName(name: string, params?: RouteParams, transition?: Transition | null): boolean {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
 
 		const route = this.routeRegistry.getByName(name);
 
-		return this.isActive(route, params);
+		return this.isActive(route, params, transition);
 	}
 
-	pathFor(route: Route, params?: RouteParams): string {
+	pathFor(route: Route, params?: RouteParams, transition?: Transition | null): string {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
@@ -184,62 +184,62 @@ export class DefaultRouter extends Injectable implements Router {
 		}
 
 		const normalizedParams = normalizeOptionalRouteParams(params) || new Map();
-		applyRouteDefaults(this.activeTransition, normalizedParams, route.fullDefaults);
+		applyRouteDefaults(transition ?? this.activeTransition, normalizedParams, route.fullDefaults);
 
 		return this.handler.pathFor(route, normalizedParams);
 	}
 
-	pathForId(id: string, params?: RouteParams): string {
+	pathForId(id: string, params?: RouteParams, transition?: Transition | null): string {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
 
 		const route = this.routeRegistry.getById(id);
 
-		return this.pathFor(route, params);
+		return this.pathFor(route, params, transition);
 	}
 
-	pathForName(name: string, params?: RouteParams): string {
+	pathForName(name: string, params?: RouteParams, transition?: Transition | null): string {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
 
 		const route = this.routeRegistry.getByName(name);
 
-		return this.pathFor(route, params);
+		return this.pathFor(route, params, transition);
 	}
 
-	goTo(route: Route, params?: RouteParams, data?: RouteData): void {
+	goTo(route: Route, params?: RouteParams, data?: RouteData, transition?: Transition | null): void {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
 
 		const normalizedParams = normalizeOptionalRouteParams(params) || new Map();
-		applyRouteDefaults(this.activeTransition, normalizedParams, route.fullDefaults);
+		applyRouteDefaults(transition ?? this.activeTransition, normalizedParams, route.fullDefaults);
 
 		const normalizedData = normalizeOptionalRouteData(data);
 
 		return this.handler.goTo(route, normalizedParams, normalizedData);
 	}
 
-	goToId(id: string, params?: RouteParams, data?: RouteData): void {
+	goToId(id: string, params?: RouteParams, data?: RouteData, transition?: Transition | null): void {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
 
 		const route = this.routeRegistry.getById(id);
 
-		this.goTo(route, params, data);
+		this.goTo(route, params, data, transition);
 	}
 
-	goToName(name: string, params?: RouteParams, data?: RouteData): void {
+	goToName(name: string, params?: RouteParams, data?: RouteData, transition?: Transition | null): void {
 		if (!this.handler) {
 			throw new Error('Attempt to use stopped router');
 		}
 
 		const route = this.routeRegistry.getByName(name);
 
-		this.goTo(route, params, data);
+		this.goTo(route, params, data, transition);
 	}
 
 	// portals - todo: move?

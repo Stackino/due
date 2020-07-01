@@ -90,10 +90,13 @@ export function applyRouteDefaults(from: Transition | null, params: Map<string, 
 		if (value === Inherit) {
 			const inheritedValue = from?.toParams.get(key);
 			if (inheritedValue === undefined || inheritedValue === null) {
-				throw new Error(`Cannot inherit route param '${key}' as it is not present in previous params`);
+				// TODO: this should throw, however during transitions react plugin isn't exactly precise on
+				// when to re-render and at very least `Link`s throw.
+				params.set(key, 'missing-inherit-value');
+				//throw new Error(`Cannot inherit route param '${key}' as it is not present in previous params`);
+			} else {
+				params.set(key, inheritedValue);
 			}
-
-			params.set(key, inheritedValue);
 		} else {
 			params.set(key, value);
 		}

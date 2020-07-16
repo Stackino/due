@@ -2,7 +2,7 @@
 
 Dependencies:
 ```sh
-yarn add mobx mobx-react-lite react react-dom reflect-metadata
+yarn add mobx mobx-react-lite react react-dom
 ```
 
 Library:

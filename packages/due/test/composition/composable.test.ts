@@ -1,5 +1,4 @@
 import 'jest';
-import 'reflect-metadata';
 import { DiagnosticsServiceTag, DefaultDiagnosticsService, LayoutRouteDeclaration, PageRouteDeclaration, Composable, delay, ServiceProvider, ServiceCollection } from '../../src';
 import { observable, runInAction } from 'mobx';
 

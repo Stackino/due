@@ -25,8 +25,7 @@
     "ua-parser-js": "^0.7.21"
   },
   "peerDependencies": {
-    "mobx": "^4.9.0 || ^5.9.0",
-    "reflect-metadata": "^0.1.0"
+    "mobx": "^4.9.0 || ^5.9.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.0",

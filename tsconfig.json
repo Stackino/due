@@ -13,7 +13,6 @@
         "moduleResolution": "node",
         "lib": [ "dom", "es2018" ],
         "types": [
-            "reflect-metadata",
             "webpack-env"
         ]
     }

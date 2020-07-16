@@ -1,5 +1,4 @@
 import 'jest';
-import 'reflect-metadata';
 import { Tag, Injectable, ServiceCollection } from '../../src';
 
 // test classes

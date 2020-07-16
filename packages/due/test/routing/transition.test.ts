@@ -1,5 +1,4 @@
 import 'jest';
-import 'reflect-metadata';
 import { RouteBuilder } from '../../src/routing/route-builder';
 import { TransitionController, TransitionStatus } from '../../src/routing/transition';
 import { RootRouteDeclaration, RootPage, Routable, Route, DefaultRouteRegistry, ServiceCollection, DiagnosticsServiceTag, DefaultDiagnosticsService, RouteRegistry, LayoutRouteDeclaration, PageRouteDeclaration, ServiceProvider, Inherit } from '../../src';

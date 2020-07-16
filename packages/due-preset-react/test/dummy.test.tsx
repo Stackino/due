@@ -1,5 +1,4 @@
 import 'jest';
-import 'reflect-metadata';
 import { ReactPage, RouteBuilder } from '../src';
 
 class TestPage extends ReactPage {

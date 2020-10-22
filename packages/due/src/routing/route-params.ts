@@ -1,13 +1,13 @@
 import { isObjectOrNull } from '../tools';
 import { Transition } from './transition';
 
-export const Inherit = Symbol('kebab');
+export const Inherit = Symbol('Stackino due route value inherit marker');
 export type RouteDefaultValue = string | typeof Inherit;
 
-export type RouteParams = { readonly [key: string]: string } | ReadonlyMap<string, string>;
-export type RouteDefaults = { readonly [key: string]: RouteDefaultValue } | ReadonlyMap<string, RouteDefaultValue>;
+export type RouteParams = { readonly [key: string]: string | undefined | null } | ReadonlyMap<string, string>;
+export type RouteDefaults = { readonly [key: string]: RouteDefaultValue | undefined | null } | ReadonlyMap<string, RouteDefaultValue>;
 // TODO: this should be serializable
-export type RouteData = { readonly [key: string]: string } | ReadonlyMap<string | symbol, unknown>;
+export type RouteData = { readonly [key: string]: string  | undefined | null } | ReadonlyMap<string | symbol, unknown>;
 
 export function normalizeRouteParams(params: RouteParams): Map<string, string> {
 	if (params instanceof Map) {
@@ -17,7 +17,9 @@ export function normalizeRouteParams(params: RouteParams): Map<string, string> {
 	const result = new Map<string, string>();
 
 	for (const [k, v] of Object.entries(params)) {
-		result.set(k, v);
+		if (typeof v !== 'undefined' && v !== null) {
+			result.set(k, v);
+		}
 	}
 
 	return result;
@@ -38,7 +40,9 @@ export function normalizeRouteData(data: RouteData): Map<string | symbol, unknow
 	const result = new Map<string, string>();
 
 	for (const [k, v] of Object.entries(data)) {
-		result.set(k, v);
+		if (typeof v !== 'undefined' && v !== null) {
+			result.set(k, v);
+		}
 	}
 
 	return result;
@@ -59,7 +63,9 @@ export function normalizeRouteDefaults(defaults: RouteDefaults): Map<string, Rou
 	const result = new Map<string, RouteDefaultValue>();
 
 	for (const [k, v] of Object.entries(defaults)) {
-		result.set(k, v);
+		if (typeof v !== 'undefined' && v !== null) {
+			result.set(k, v);
+		}
 	}
 
 	return result;

@@ -6,12 +6,12 @@ export class PromiseCompletitionSource<T> {
 		});
 	}
 
-	private resolve!: (value?: T | PromiseLike<T> | undefined) => void;
+	private resolve!: (value: T | PromiseLike<T>) => void;
 	private reject!: (reason?: unknown) => void;
 
 	promise: Promise<T>;
 
-	tryResolve(value: T | PromiseLike<T> | undefined): void {
+	tryResolve(value: T | PromiseLike<T>): void {
 		this.resolve(value);
 	}
 

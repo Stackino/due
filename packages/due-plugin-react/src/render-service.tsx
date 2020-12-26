@@ -7,6 +7,9 @@ import { RenderContextContext, PageContext, PortalContext } from './context';
 import { usePageContext } from './hooks';
 import { createObservedTemplate } from './internal/tools';
 
+// eslint-disable-next-line prefer-const
+export let View: React.FunctionComponent<ViewProps>;
+
 function createPageElement(pageContext: PageContext): React.ReactElement<any> {
 	const currentState = pageContext.transition.active[pageContext.index];
 
@@ -89,7 +92,7 @@ export interface ViewProps {
 	children?: (pageElement: React.ReactElement) => React.ReactElement;
 }
 
-export const View: React.FunctionComponent<ViewProps> = (props): React.ReactElement | null => {
+View = (props): React.ReactElement | null => {
 	const pageContext = props.pageContext || usePageContext();
 
 	if (!pageContext || pageContext.transition.active.length <= pageContext.index + 1) {

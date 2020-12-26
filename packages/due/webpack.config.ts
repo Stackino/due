@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import * as webpack from 'webpack';
 import * as path from 'path';
 
@@ -20,11 +22,11 @@ function configure(): webpack.Configuration {
 			extensions: ['.tsx', '.ts', '.js'],
         },
         externals: [
-            function (context: string, request: string, callback: (error?: unknown, result?: string | null) => void): void {
+            function({ context, request }, callback) {
                 if (request.startsWith('.')) {
                     callback();
-                } else {
-                    callback(null, request);
+                } else {          
+                    callback(null!, request);
                 }
             },
         ],

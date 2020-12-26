@@ -1,4 +1,4 @@
-import { delay, Plugin, Tag, ServiceCollection } from '@stackino/due-preset-react';
+import { delay, Plugin, Tag, ServiceCollection } from '@stackino/due';
 import { RpcClient } from '@odachi/rpc-client';
 
 export const RpcClientTag = new Tag<RpcClient>('Odachi RpcClient');

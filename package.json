@@ -20,10 +20,10 @@
         "packages/due-preset-react"
     ],
     "devDependencies": {
-        "@odachi/rpc-client": "0.1.2",
-        "mobx": "^5.15.4",
-        "mobx-react-lite": "^2.0.7",
-        "react": "^16.13.1",
-        "react-dom": "^16.13.1"
+        "@odachi/rpc-client": "0.1.3",
+        "mobx": "^5.15.7",
+        "mobx-react-lite": "^2.2.2",
+        "react": "^17.0.1",
+        "react-dom": "^17.0.1"
     }
 }

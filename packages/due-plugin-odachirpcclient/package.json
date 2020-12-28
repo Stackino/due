@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due-plugin-odachirpcclient",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",
@@ -19,8 +19,8 @@
     "prepublishOnly": "yarn run build:prod"
   },
   "peerDependencies": {
-    "@stackino/due": "0.2.x",
-    "@odachi/rpc-client": "^0.1.0"
+    "@odachi/rpc-client": "^0.1.0",
+    "@stackino/due": "0.2.x"
   },
   "devDependencies": {
     "@types/jest": "^26.0.19",

@@ -30,7 +30,7 @@ function configure(): webpack.Configuration {
                 if (request?.startsWith('.')) {
                     callback();
                 } else {          
-                    callback(null!, request);
+                    callback(undefined, request);
                 }
             },
         ],

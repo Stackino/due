@@ -3,6 +3,8 @@
 import * as webpack from 'webpack';
 import * as path from 'path';
 
+const ESLintWebpackPlugin = require('eslint-webpack-plugin');
+
 function configure(): webpack.Configuration {
     const configuration: webpack.Configuration = {
         entry: './src/index.ts',
@@ -14,16 +16,18 @@ function configure(): webpack.Configuration {
         },
         module: {
             rules: [
-				{ test: /\.tsx?$/, use: 'eslint-loader', exclude: /node_modules/, enforce: 'pre' },
 				{ test: /\.tsx?$/, use: 'ts-loader', exclude: /node_modules/ },
             ],
         },
         resolve: {
 			extensions: ['.tsx', '.ts', '.js'],
         },
+        plugins: [
+            new ESLintWebpackPlugin(),            
+        ],
         externals: [
             function({ context, request }, callback) {
-                if (request.startsWith('.')) {
+                if (request?.startsWith('.')) {
                     callback();
                 } else {
                     callback(null!, request);

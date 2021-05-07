@@ -1,5 +1,5 @@
 import { RouteParams, RouteData, RouterTag } from '@stackino/due';
-import * as classNames from 'classnames';
+import classNames from 'classnames';
 import * as React from 'react';
 import { useDependency, usePageContext, useRenderContext } from './hooks';
 import { observer } from 'mobx-react-lite';
@@ -34,7 +34,7 @@ export const Link: React.FunctionComponent<LinkProps> = observer(function ({ var
 
 	const href = router.pathForName(to, params, transition);
 	const isActive = router.isActiveName(activeName ?? to, activeParams ?? params, transition);
-	const computedClassName = classNames(className, isActive && activeClassName, transition);
+	const computedClassName = classNames(className, isActive && activeClassName);
 
 	if (variant === 'a') {
 		return <a

@@ -6,7 +6,6 @@
         "noImplicitReturns": true,
         "noEmitOnError": false,
         "removeComments": false,
-        "experimentalDecorators": true,
         "downlevelIteration": true,
         "importHelpers": true,
         "module": "commonjs",

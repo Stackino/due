@@ -1,8 +1,16 @@
 import 'jest';
 import { DiagnosticsServiceTag, DefaultDiagnosticsService, LayoutRouteDeclaration, PageRouteDeclaration, Composable, delay, ServiceProvider, ServiceCollection } from '../../src';
-import { observable, runInAction } from 'mobx';
+import { makeObservable, observable, runInAction } from 'mobx';
 
 class MockComposable extends Composable {
+
+	constructor() {
+		super();
+
+		makeObservable(this, {
+			reactionTrigger: observable,
+		});
+	}
 
 	report: string[] = [];
 
@@ -10,7 +18,6 @@ class MockComposable extends Composable {
 		this.report.push('timer tick');
 	});
 
-	@observable
 	reactionTrigger = '';
 
 	reaction = this.$reaction(() => this.reactionTrigger, data => {
@@ -81,7 +88,9 @@ test('reaction is reacting', async () => {
 	expect(composable.reaction.enabled).toBe(true);
 	expect(composable.reaction.running).toBe(false);
 
-	composable.reactionTrigger = 'foo';
+	runInAction(() => {
+		composable.reactionTrigger = 'foo';
+	});
 
 	runInAction(() => {
 		composable.reactionTrigger = 'baz';

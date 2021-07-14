@@ -1,7 +1,7 @@
 import { ServiceProvider } from '../ioc';
 import { Composable } from '../composition';
 import { PromiseCompletitionSource } from '../tools';
-import { observable, when } from 'mobx';
+import { makeObservable, observable, when } from 'mobx';
 
 export class PortalLifecycle {
 	constructor(
@@ -72,16 +72,19 @@ export class PortalController<TInput, TOutput> {
 		this.lifecycle = lifecycle;
 		this.input = input;
 		this.output = null;
+
+		makeObservable(this, {
+			status: observable,
+			input: observable,
+			output: observable,
+		});
 	}
 
 	// state
 	private readonly lifecycle: PortalLifecycle;
 
-	@observable
 	status: PortalStatus = 'opening';
-	@observable
 	input: TInput;
-	@observable
 	output: TOutput | null;
 
 	/**

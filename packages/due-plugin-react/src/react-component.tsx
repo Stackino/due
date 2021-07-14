@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { observable, runInAction } from 'mobx';
+import { makeObservable, observable, runInAction } from 'mobx';
 import { useDependency } from './hooks';
 import { Composable, ServiceProviderTag } from '@stackino/due';
 import { createObservedTemplate } from './internal/tools';
@@ -10,9 +10,12 @@ export abstract class ReactComponent<TProps = {}> extends Composable {
 		super();
 
 		this.props = props;
+
+		makeObservable(this, {
+			props: observable.ref
+		});
 	}
 
-	@observable.ref
 	props: TProps;
 
 	onUpdate?(nextProps: TProps, prevProps: TProps): void;

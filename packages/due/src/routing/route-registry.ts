@@ -88,11 +88,6 @@ export class DefaultRouteRegistry implements RouteRegistry {
 		this._routesById = new Map();
 		this._routesByName = new Map();
 		this.index(this._root);
-
-		//console.log('internal root        ', this._root);
-		//console.log('internal index(decl) ', this._routesByDeclaration);
-		//console.log('internal index(id)   ', this._routesById);
-		//console.log('internal index(name) ', this._routesByName);
 	}
 
 	getByDeclaration(declaration: RouteDeclaration): Route {

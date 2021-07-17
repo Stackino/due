@@ -1,10 +1,11 @@
-import { State } from './state';
-import { Route } from './route';
-import { NoopRoutable, Routable } from './routable';
-import { PromiseCompletitionSource, executeProvider, Newable } from '../tools';
-import { ServiceProvider, Injectable, ServiceProviderTag } from '../ioc';
-import { DiagnosticsServiceTag, DiagnosticsService } from '../diagnostics';
+import { runInAction } from 'mobx';
 import { StackinoDueConfiguration } from '../config';
+import { DiagnosticsServiceTag } from '../diagnostics';
+import { Injectable, ServiceCollection, ServiceProviderTag } from '../ioc';
+import { executeProvider, Newable, PromiseCompletitionSource } from '../tools';
+import { NoopRoutable, Routable } from './routable';
+import { Route } from './route';
+import { State } from './state';
 
 export enum TransitionStatus {
 	pristine = 100,
@@ -52,7 +53,7 @@ export class TransitionController extends Injectable implements Transition {
 		if (route.declaration.page) {
 			const pageOrModule = await executeProvider(route.declaration.page);
 
-			if (typeof pageOrModule === 'object') {
+			if (typeof pageOrModule === 'object' && pageOrModule !== null) {
 				Page = pageOrModule.default;
 			} else {
 				Page = pageOrModule;
@@ -61,41 +62,96 @@ export class TransitionController extends Injectable implements Transition {
 			Page = NoopRoutable;
 		}
 
-		const page = this.serviceProvider.createFromClass(Page);
+		return new State(
+			route, 
+			(_self, parent, setInstance, setServiceProvider) => {
+				const serviceProvider = (parent?.serviceProvider ?? this.serviceProvider).createScope({
+					configure: (services: ServiceCollection) => (Page as unknown as typeof Routable).configureServices(services),
+				});
+		
+				const instance = serviceProvider.createFromClass(Page);
 
-		return new State(route, page, async (setCommitAction) => {
-			if (page.onEntering) {
-				const enterCommit = await page.onEntering(this);
+				setServiceProvider(serviceProvider);
+				setInstance(instance);
+			},
+			async (self, setCommitAction) => {
+				let enteringCommit: void | (() => void);
+				if (self.instance.onEntering) {
+					enteringCommit = await self.instance.onEntering(this);
+				}
 
-				if (enterCommit) {
-					setCommitAction(enterCommit);
+				let enteringOrRetainingCommit: void | (() => void);
+				if (self.instance.onEnteringOrRetaining) {
+					enteringOrRetainingCommit = await self.instance.onEnteringOrRetaining(this);
+				}
+
+				if (enteringCommit && enteringOrRetainingCommit) {
+					setCommitAction(() => {
+						enteringCommit!();
+						enteringOrRetainingCommit!();
+					});
+				}
+				else if (enteringCommit) {
+					setCommitAction(enteringCommit);
+				}
+				else if (enteringOrRetainingCommit) {
+					setCommitAction(enteringOrRetainingCommit);
 				}
 			}
-		});
+		);
 	}
 
 	private async createRetainingState(state: State): Promise<State> {
-		return new State(state.route, state.page, async (setCommitAction) => {
-			if (state.page.onRetaining) {
-				const retainCommit = await state.page.onRetaining(this);
+		return new State(
+			state.route, 
+			(_self, _parent, setInstance, setServiceProvider) => {
+				setInstance(state.instance);
+				setServiceProvider(state.serviceProvider);
+			}, 
+			async (self, setCommitAction) => {
+				let retainingCommit: void | (() => void);
+				if (self.instance.onRetaining) {
+					retainingCommit = await self.instance.onRetaining(this);
+				}
 
-				if (retainCommit) {
-					setCommitAction(retainCommit);
+				let enteringOrRetainingCommit: void | (() => void);
+				if (self.instance.onEnteringOrRetaining) {
+					enteringOrRetainingCommit = await self.instance.onEnteringOrRetaining(this);
+				}
+
+				if (retainingCommit && enteringOrRetainingCommit) {
+					setCommitAction(() => {
+						retainingCommit!();
+						enteringOrRetainingCommit!();
+					});
+				}
+				else if (retainingCommit) {
+					setCommitAction(retainingCommit);
+				}
+				else if (enteringOrRetainingCommit) {
+					setCommitAction(enteringOrRetainingCommit);
 				}
 			}
-		});
+		);
 	}
 
 	private async createExitingState(state: State): Promise<State> {
-		return new State(state.route, state.page, async (setCommitAction) => {
-			if (state.page.onExiting) {
-				const exitCommit = await state.page.onExiting(this);
+		return new State(
+			state.route, 
+			(_self, _parent, setInstance, setServiceProvider) => {
+				setInstance(state.instance);
+				setServiceProvider(state.serviceProvider);
+			},
+			async (self, setCommitAction) => {
+				if (self.instance.onExiting) {
+					const exitCommit = await self.instance.onExiting(this);
 
-				if (exitCommit) {
-					setCommitAction(exitCommit);
+					if (exitCommit) {
+						setCommitAction(exitCommit);
+					}
 				}
 			}
-		});
+		);
 	}
 
 	public async execute(): Promise<void> {
@@ -131,8 +187,8 @@ export class TransitionController extends Injectable implements Transition {
 						compareParameters = true;
 						break;
 
-					case 'with-onRetaining':
-						compareParameters = !current.page.onRetaining;
+					case 'with-callback':
+						compareParameters = !current.instance.onRetaining && !current.instance.onEnteringOrRetaining;
 						break;
 				}
 
@@ -175,6 +231,24 @@ export class TransitionController extends Injectable implements Transition {
 
 		if (this.status as TransitionStatus === TransitionStatus.suppressed) {
 			return;
+		}
+
+		// initialize states
+		let parent: State | null = null;
+		for (const state of retained) {
+			state.initialize(parent);
+			parent = state;
+		}
+		for (const state of entering) {
+			state.initialize(parent);
+			parent = state;
+		}
+		for (const state of exiting) {
+			// TODO: pass parent as well? currently the parameter
+			// in exiting states isn't used and it's unlikely
+			// to be point of extensibility, so perhaps it's not
+			// worth the trouble
+			state.initialize(null);
 		}
 
 		// execute pre-render lifecycle methods
@@ -234,15 +308,17 @@ export class TransitionController extends Injectable implements Transition {
 			throw new Error('Attempt to finish transition while it\'s not executed');
 		}
 
-		for (const state of this.exiting) {
-			state.commit();
-		}
-		for (const state of this.retained) {
-			state.commit();
-		}
-		for (const state of this.entering) {
-			state.commit();
-		}
+		runInAction(() => {
+			for (const state of this.exiting) {
+				state.commit();
+			}
+			for (const state of this.retained) {
+				state.commit();
+			}
+			for (const state of this.entering) {
+				state.commit();
+			}
+		});
 		this._status = TransitionStatus.finished;
 
 		this._finished.tryResolve();

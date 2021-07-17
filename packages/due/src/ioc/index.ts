@@ -62,7 +62,7 @@ export enum ServiceLifetime {
 	 */
 	transient = 1,
 	/**
-	 * Single instance for root service provider and all it's children.
+	 * Single instance for service provider where it was registered and all it's children.
 	 */
 	singleton = 2,
 	/**
@@ -71,13 +71,22 @@ export enum ServiceLifetime {
 	scope = 3,
 }
 
+/**
+ * Determines whether descriptor should be considered for resolution.
+ */
+export enum ServiceDescriptorStatus {
+	configuring = 1,
+	bound = 2,
+	unbound = 3,
+}
+
 export interface BindingInSyntax<T> {
 	/**
 	 * Declare service as transient. Every request will receive new instance.
 	 */
 	inTransientLifetime(): void;
 	/**
-	 * Declare service as singleton. Every request will receive same instance.
+	 * Declare service as singleton. Every request will receive same instance within same service provider and all its children.
 	 */
 	inSingletonLifetime(): void;
 	/**
@@ -110,9 +119,26 @@ export class ServiceDescriptor<T> implements BindingInSyntax<T>, BindingToSyntax
 	}
 
 	public tag: Tag<T>;
-	public lifetime: ServiceLifetime = ServiceLifetime.transient;
+	public status: ServiceDescriptorStatus = ServiceDescriptorStatus.configuring;
+	public lifetime: ServiceLifetime = ServiceLifetime.singleton;
 	public provider: ((serviceProvider: ServiceProvider) => T) | null = null;
 	
+	toValue(value: T): BindingInSyntax<T> {
+		this.provider = () => value;
+		this.status = ServiceDescriptorStatus.bound;
+		return this;
+	}
+	toClass(ctor: Newable<T>): BindingInSyntax<T> {
+		this.provider = () => new ctor();
+		this.status = ServiceDescriptorStatus.bound;
+		return this;
+	}
+	toFactory(factory: (serviceProvider: ServiceProvider) => T): BindingInSyntax<T> {
+		this.provider = factory;
+		this.status = ServiceDescriptorStatus.bound;
+		return this;
+	}
+
 	inTransientLifetime(): void {
 		this.lifetime = ServiceLifetime.transient;
 	}
@@ -123,17 +149,25 @@ export class ServiceDescriptor<T> implements BindingInSyntax<T>, BindingToSyntax
 		this.lifetime = ServiceLifetime.scope;
 	}
 
-	toValue(value: T): BindingInSyntax<T> {
-		this.provider = () => value;
-		return this;
+	/**
+	 * Mark descriptor as unbound and reset it's lifetime and provider.
+	 */
+	unbind() {
+		this.status = ServiceDescriptorStatus.unbound;
+		this.lifetime = ServiceLifetime.singleton;
+		this.provider = null;
 	}
-	toClass(ctor: Newable<T>): BindingInSyntax<T> {
-		this.provider = () => new ctor();
-		return this;
-	}
-	toFactory(factory: (serviceProvider: ServiceProvider) => T): BindingInSyntax<T> {
-		this.provider = factory;
-		return this;
+
+	/**
+	 * Create a clone of this service descriptor.
+	 * @returns Clone of this service descriptor.
+	 */
+	clone() {
+		const clone = new ServiceDescriptor(this.tag);
+		clone.lifetime = this.lifetime;
+		clone.provider = this.provider;
+		clone.status = this.status;
+		return clone;
 	}
 }
 
@@ -143,14 +177,15 @@ export const ServiceProviderTag = new Tag<ServiceProvider>("Service provider");
  * Allow retrieval and management of services. Supposed to be instantiated using `ServiceCollection`.
  */
 export class ServiceProvider {
-	constructor(descriptors: Map<Tag<unknown>, ServiceDescriptor<unknown>>, singletonCache?: Map<Tag<unknown>, unknown>) {
+	constructor(descriptors: Map<Tag<unknown>, ServiceDescriptor<unknown>>, parent?: ServiceProvider) {
 		this.descriptors = descriptors;
-		this.singletonCache = singletonCache ?? new Map();
+		this.parent = parent;
 	}
 
 	private descriptors: Map<Tag<unknown>, ServiceDescriptor<unknown>>;
-	private singletonCache: Map<Tag<unknown>, unknown>;
+	private singletonCache: Map<Tag<unknown>, unknown> = new Map();
 	private scopeCache: Map<Tag<unknown>, unknown> = new Map();
+	private parent?: ServiceProvider;
 
 	private createFromDescriptor<T>(descriptor: ServiceDescriptor<T>): T {
 		if (!descriptor) {
@@ -167,6 +202,63 @@ export class ServiceProvider {
 		});
 
 		return value!;
+	}
+
+	private getImpl<T>(tag: Tag<T>, parentMode: boolean): T {
+		// when asking for service provider, return itself - this cannot be reconfigured
+		if (tag === ServiceProviderTag) {
+			return this as unknown as T;
+		}
+
+		const descriptor = this.descriptors.get(tag);
+		if (!descriptor) {
+			// if we have parent, try using it when we don't have own descriptor available
+			if (this.parent) {
+				// at this point the service should be either singleton from parent
+				// or not bound at all since we hold all other parents descriptors as well
+				return this.parent.getImpl(tag, true);
+			}
+
+			throw new Error(`Binding for service '${tag.symbol.toString()}' not found`);
+		}
+
+		if (descriptor.status === ServiceDescriptorStatus.configuring) {
+			throw new Error(`Binding for service '${tag.symbol.toString()}' is misconfigured, missing toValue, toClass or toFactory call?`);
+		}
+		if (descriptor.status === ServiceDescriptorStatus.unbound) {
+			throw new Error(`Binding for service '${tag.symbol.toString()}' was unbound`);
+		}
+
+		let value: unknown;
+		if (descriptor.lifetime === ServiceLifetime.singleton) {
+			if (this.singletonCache.has(tag)) {
+				value = this.singletonCache.get(tag);
+			} else {
+				value = this.createFromDescriptor(descriptor);
+				this.singletonCache.set(tag, value);
+			}
+		} else if (descriptor.lifetime === ServiceLifetime.scope) {
+			if (parentMode) {
+				throw new Error(`Binding for service '${tag.symbol.toString()}' found in parent provider with scope lifetime. This is likely a bug, please report it.`);
+			}
+
+			if (this.scopeCache.has(tag)) {
+				value = this.scopeCache.get(tag);
+			} else {
+				value = this.createFromDescriptor(descriptor);
+				this.scopeCache.set(tag, value);
+			}
+		} else if (descriptor.lifetime === ServiceLifetime.transient) {
+			if (parentMode) {
+				throw new Error(`Binding for service '${tag.symbol.toString()}' found in parent provider with transient lifetime. This is likely a bug, please report it.`);
+			}
+
+			value = this.createFromDescriptor(descriptor);
+		} else {
+			throw new Error(`Invalid service lifetime '${descriptor.lifetime}'`);
+		}
+
+		return value as T;
 	}
 
 	/**
@@ -206,8 +298,28 @@ export class ServiceProvider {
 	/**
 	 * Create child service provider. All scoped servies will return new values when retrieved from this service provider.
 	 */
-	createScope(): ServiceProvider {
-		return new ServiceProvider(this.descriptors, this.singletonCache);
+	createScope(options?: { configure?: (services: ServiceCollection) => void }): ServiceProvider {
+		const descriptors = new Map<Tag<unknown>, ServiceDescriptor<unknown>>();
+
+		// filter out singleton descriptors as those will be requiested by parent instance
+		// filter out descriptors that are not bound as those aren't relevant to anything
+		for (const [tag, descriptor] of this.descriptors) {
+			if (descriptor.lifetime === ServiceLifetime.singleton || descriptor.status !== ServiceDescriptorStatus.bound) {
+				continue;
+			}
+
+			// clone descriptors as they may be reconfigured
+			descriptors.set(tag, descriptor.clone());
+		}
+
+		// create and configure new collection
+		const services = new ServiceCollection(descriptors, this);
+
+		if (options?.configure) {
+			options.configure(services);
+		}
+
+		return services.build();
 	}
 
 	/**
@@ -215,52 +327,32 @@ export class ServiceProvider {
 	 * @param tag Service tag.
 	 */
 	get<T>(tag: Tag<T>): T {
-		const descriptor = this.descriptors.get(tag);
-		if (!descriptor) {
-			if (tag === ServiceProviderTag) {
-				return this as unknown as T;
-			}
-
-			throw new Error(`Missing binding for service '${tag.symbol.toString()}'`);
-		}
-
-		let value: unknown;
-		if (descriptor.lifetime === ServiceLifetime.singleton) {
-			if (this.singletonCache.has(tag)) {
-				value = this.singletonCache.get(tag);
-			} else {
-				value = this.createFromDescriptor(descriptor);
-				this.singletonCache.set(tag, value);
-			}
-		} else if (descriptor.lifetime === ServiceLifetime.scope) {
-			if (this.scopeCache.has(tag)) {
-				value = this.scopeCache.get(tag);
-			} else {
-				value = this.createFromDescriptor(descriptor);
-				this.scopeCache.set(tag, value);
-			}
-		} else if (descriptor.lifetime === ServiceLifetime.transient) {
-			value = this.createFromDescriptor(descriptor);
-		} else {
-			throw new Error(`Invalid service lifetime '${descriptor.lifetime}'`);
-		}
-
-		return value as T;
+		return this.getImpl(tag, false);
 	}
 }
 
 /**
  * Class to configure a service provider.
  */
-export class ServiceCollection {	
-	private descriptors: Map<Tag<unknown>, ServiceDescriptor<unknown>> = new Map();
+export class ServiceCollection {
+	constructor();
+	constructor(descriptors: Map<Tag<unknown>, ServiceDescriptor<unknown>>, parent: ServiceProvider);
+	constructor(descriptors?: Map<Tag<unknown>, ServiceDescriptor<unknown>>, parent?: ServiceProvider) {
+		this.descriptors = descriptors ?? new Map();
+		this.parent = parent
+	}
+
+	private descriptors: Map<Tag<unknown>, ServiceDescriptor<unknown>>;
+	private parent?: ServiceProvider;
 
 	/**
 	 * Return whether there is already a service bound to given tag or not.
 	 * @param tag Service tag.
 	 */
 	isBound<T>(tag: Tag<T>): boolean {
-		return this.descriptors.has(tag);
+		const descriptor = this.descriptors.get(tag);
+
+		return descriptor?.status === ServiceDescriptorStatus.bound;
 	}
 
 	/**
@@ -277,7 +369,7 @@ export class ServiceCollection {
 	}
 
 	/**
-	 * Attempt to create binding for given tag. If binding already exists, following calls will have no effect.
+	 * Attempt to create binding for given tag. If binding already exists, further configuration will have no effect.
 	 * @param tag Service tag.
 	 */
 	tryBind<T>(tag: Tag<T>): BindingToSyntax<T> {
@@ -289,17 +381,23 @@ export class ServiceCollection {
 	}
 
 	/**
-	 * Remove binding for given tag if it exits.
+	 * Remove binding for given tag. If used in child collection this will block attempts at resolving the service from parent.
 	 * @param tag Service tag.
 	 */
-	unbind<T>(tag: Tag<T>): boolean {
-		return this.descriptors.delete(tag);
+	unbind<T>(tag: Tag<T>): void {
+		let descriptor = this.descriptors.get(tag);
+		if (!descriptor) {
+			descriptor = new ServiceDescriptor(tag);
+			this.descriptors.set(tag, descriptor);
+		}
+
+		descriptor.unbind();
 	}
 
 	/**
 	 * Create new service provider using configured descriptors.
 	 */
 	build(): ServiceProvider {
-		return new ServiceProvider(new Map(this.descriptors));
+		return new ServiceProvider(new Map(this.descriptors), this.parent);
 	}
 }

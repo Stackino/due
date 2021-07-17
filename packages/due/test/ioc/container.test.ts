@@ -48,6 +48,16 @@ test('lifetime', async () => {
 	expect(serviceProvider2.get(Service1Tag)).toBe(service1);
 	expect(serviceProvider2.get(Service2Tag)).not.toBe(service2);
 	expect(serviceProvider2.get(Service3Tag)).not.toBe(service3);
+	
+	const serviceProvider3 = serviceProvider.createScope({ 
+		configure: (services) => {
+			services.bind(Service1Tag).toClass(Service1).inSingletonLifetime();
+			services.unbind(Service3Tag);
+		}
+	});
+	expect(serviceProvider3.get(Service1Tag)).not.toBe(service1);
+	expect(serviceProvider3.get(Service2Tag)).not.toBe(service2);
+	expect(() => serviceProvider3.get(Service3Tag)).toThrow('Binding for service \'Symbol(Tag: anonymous service)\' was unbound');
 });
 
 test('injectable service', async () => {

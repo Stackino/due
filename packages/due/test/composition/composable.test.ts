@@ -1,5 +1,5 @@
 import 'jest';
-import { DiagnosticsServiceTag, DefaultDiagnosticsService, LayoutRouteDeclaration, PageRouteDeclaration, Composable, delay, ServiceProvider, ServiceCollection } from '../../src';
+import { DiagnosticsServiceTag, DefaultDiagnosticsService, Composable, delay, ServiceProvider, ServiceCollection } from '../../src';
 import { makeObservable, observable, runInAction } from 'mobx';
 
 class MockComposable extends Composable {

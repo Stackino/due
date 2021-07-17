@@ -1,11 +1,13 @@
-import { Routable } from './routable';
+import { ServiceProvider } from '../ioc';
+import { NoopRoutable, Routable } from './routable';
 import { Route } from './route';
 
 enum StateStatus {
 	pristine = 1,
-	running = 2,
-	executed = 3,
-	finished = 4,
+	initialized = 2,
+	running = 3,
+	executed = 4,
+	finished = 5,
 }
 
 /**
@@ -14,21 +16,38 @@ enum StateStatus {
 export class State {
 	constructor(
 		readonly route: Route,
-		readonly page: Routable,
-		private readonly mutator: (setCommitAction: (value: () => void) => void) => Promise<void>,
+		private readonly initializer: (self: State, parent: State | null, setInstance: (instance: Routable) => void, setServiceProvider: (instance: ServiceProvider) => void) => void,
+		private readonly executor: (self: State, setCommitAction: (value: () => void) => void) => Promise<void>,
 	) {
 	}
 
+	instance: Routable = null!;
+	serviceProvider: ServiceProvider = null!;
 	private status: StateStatus = StateStatus.pristine;
 	private commitAction: (() => void) | null = null;
 
-	async run(): Promise<void> {
+	initialize(parent: State | null): void {
 		if (this.status !== StateStatus.pristine) {
-			throw new Error('Attempt to run non-pristine state');
+			throw new Error('Attempt to initialize non-pristine state');
+		}
+
+		this.initializer(
+			this,
+			parent, 
+			(instance) => this.instance = instance,
+			(serviceProvider) => this.serviceProvider = serviceProvider,
+		);
+		this.status = StateStatus.initialized;
+	}
+
+	async run(): Promise<void> {
+		if (this.status !== StateStatus.initialized) {
+			throw new Error('Attempt to run non-initialized state');
 		}
 
 		this.status = StateStatus.running;
-		await this.mutator(
+		await this.executor(
+			this,
 			commitAction => this.commitAction = commitAction
 		);
 		this.status = StateStatus.executed;

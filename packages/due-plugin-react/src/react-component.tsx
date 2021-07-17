@@ -18,7 +18,9 @@ export abstract class ReactComponent<TProps = {}> extends Composable {
 
 	props: TProps;
 
+	onEnter?(nextProps: TProps): void;
 	onUpdate?(nextProps: TProps, prevProps: TProps): void;
+	onExit?(): void;
 
 	abstract template: React.FunctionComponent;
 }
@@ -48,11 +50,24 @@ export function connectReactComponent<TReactComponent extends ReactComponent<TPr
 		const ObservedComponent = createObservedTemplate('ReactComponent', instance.template);
 
 		React.useEffect(() => {
-			runInAction(() => {
-				if (instance!.onUpdate) {
-					instance!.onUpdate(props, instance!.props);
+			if (instance && instance.onEnter) {
+				instance.onEnter(props);
+			}
+
+			return () => {
+				if (instance && instance.onExit) {
+					instance.onExit();
 				}
-				instance!.props = props;
+			};
+		}, []);
+		React.useEffect(() => {
+			runInAction(() => {
+				if (instance) {
+					if (instance.onUpdate) {
+						instance.onUpdate(props, instance!.props);
+					}
+					instance.props = props;
+				}
 			});
 		}, [props]);
 

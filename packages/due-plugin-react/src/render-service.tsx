@@ -14,7 +14,7 @@ function createPageElement(pageContext: PageContext): React.ReactElement<any> {
 	const currentState = pageContext.transition.active[pageContext.index];
 
 	// hack: adfkja
-	const page = currentState.page as unknown as ReactPage;
+	const page = currentState.instance as unknown as ReactPage;
 
 	// hack: convert `Routable` to `ReactPage`
 	if (!page.template) {
@@ -95,15 +95,16 @@ export interface ViewProps {
 View = (props): React.ReactElement | null => {
 	const pageContext = props.pageContext || usePageContext();
 
-	if (!pageContext || pageContext.transition.active.length <= pageContext.index + 1) {
+	const nextIndex = pageContext.index + 1;
+	if (!pageContext || pageContext.transition.active.length <= nextIndex) {
 		return null;
 	}
 
 	const nextPageContext: PageContext = {
 		kind: 'page',
-		serviceProvider: pageContext.serviceProvider,
+		serviceProvider: pageContext.transition.active[nextIndex - 1].serviceProvider,
 		transition: pageContext.transition,
-		index: pageContext.index + 1,
+		index: nextIndex,
 	};
 
 	const pageElement = createPageElement(nextPageContext);
@@ -144,7 +145,7 @@ export class ReactRenderService extends Injectable implements RenderService {
 
 		const root = transition.active[0];
 
-		if (!(root.page instanceof RootPage)) {
+		if (!(root.instance instanceof RootPage)) {
 			throw new Error('Attempt to render invalid root state');
 		}
 		if (transition.active.length <= 1) {
@@ -158,7 +159,7 @@ export class ReactRenderService extends Injectable implements RenderService {
 		} else {
 			rootPageContext = this.rootPageContext = {
 				kind: 'page',
-				serviceProvider: this.serviceProvider,
+				serviceProvider: transition.active[0].serviceProvider,
 				transition,
 				index: 1,
 			};

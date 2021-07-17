@@ -1,11 +1,10 @@
-import { Tag, Injectable, ServiceProviderTag } from '../ioc';
-import { Transition, TransitionController, TransitionStatus } from './transition';
-import { Route } from './route';
+import { observable, runInAction } from 'mobx';
+import { RouteDeclaration, RouteRegistryTag } from '.';
+import { Injectable, ServiceProviderTag, Tag } from '../ioc';
 import { Portal, PortalController, PortalLifecycle } from './portal';
-import { RouteRegistryTag, RouteRegistry, RouteDeclaration, State } from '.';
-import { PromiseCompletitionSource, executeProvider } from '..';
-import { observable, when } from 'mobx';
-import { RouteParams, RouteData, normalizeRouteParams, normalizeRouteData, normalizeOptionalRouteParams, normalizeOptionalRouteData, applyRouteDefaults } from './route-params';
+import { Route } from './route';
+import { applyRouteDefaults, normalizeOptionalRouteData, normalizeOptionalRouteParams, normalizeRouteData, normalizeRouteParams, RouteData, RouteParams } from './route-params';
+import { Transition, TransitionController, TransitionStatus } from './transition';
 
 export const RouterHandlerFactoryTag = new Tag<RouterHandlerFactory>('Stackino router handler factory');
 export const RouterTag = new Tag<Router>('Stackino router');
@@ -105,17 +104,21 @@ export class DefaultRouter extends Injectable implements Router {
 
 		const nextPendingTransitions = this.pendingTransitions.slice();
 		nextPendingTransitions.push(transition);
-		this.pendingTransitionsValue.set(nextPendingTransitions);
+		runInAction(() => {
+			this.pendingTransitionsValue.set(nextPendingTransitions);
+		});
 
 		(async () => {
 			await transition.finished;
-
+			
 			const nextPendingTransitions = this.pendingTransitions.filter(t => t !== transition);
-			this.pendingTransitionsValue.set(nextPendingTransitions);
+			runInAction(() => {
+				this.pendingTransitionsValue.set(nextPendingTransitions);
 
-			if (transition.status === TransitionStatus.finished) {
-				this.activeTranstionValue.set(transition);
-			}
+				if (transition.status === TransitionStatus.finished) {
+					this.activeTranstionValue.set(transition);
+				}
+			});
 		})();
 
 		return transition;

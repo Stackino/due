@@ -8,10 +8,10 @@ export class Route {
 		readonly declaration: RouteDeclaration,
 		readonly id: string,
 		readonly name: string | null,
-		readonly path: string | null,
+		readonly path: string,
 		readonly params: string[],
 		readonly defaults: ReadonlyMap<string, RouteDefaultValue>,
-		readonly fullPath: string | null,
+		readonly fullPath: string,
 		readonly fullParams: string[],
 		readonly fullDefaults: ReadonlyMap<string, RouteDefaultValue>,
 		readonly parent: Route | null,
@@ -120,23 +120,15 @@ function buildRouteName(route: RouteDeclaration, parent: Route | null): string |
 /**
  * Build relative path from given route parent route.
  */
-function buildRoutePath(route: RouteDeclaration): string | null {
-	if (!route.path) {
-		return null;
-	}
-
-	return normalizeRoutePath(route.path);
+function buildRoutePath(route: RouteDeclaration): string {
+	return normalizeRoutePath(route.path ?? '/');
 }
 
 /**
  * Build full path of given route.
  */
-function buildFullRoutePath(route: RouteDeclaration, parent: Route | null): string | null {
-	if (!route.path) {
-		return null;
-	}
-
-	let result = route.path;
+function buildFullRoutePath(route: RouteDeclaration, parent: Route | null): string {
+	let result = route.path ?? '/';
 
 	while (parent) {
 		if (!parent.fullPath) {

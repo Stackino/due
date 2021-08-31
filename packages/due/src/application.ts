@@ -67,8 +67,6 @@ export abstract class Application {
 		// wait for exit?
 		//  - browser - new api to stop running app? `run` returning stop function?
 		//  - ssr - after router is idle?
-
-		// stop application?
 	}
 
 	public run(errorHandler?: (error: unknown) => void): void {

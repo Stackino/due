@@ -6,8 +6,8 @@ export type RouteDefaultValue = string | typeof Inherit;
 
 export type RouteParams = { readonly [key: string]: string | undefined | null } | ReadonlyMap<string, string>;
 export type RouteDefaults = { readonly [key: string]: RouteDefaultValue | undefined | null } | ReadonlyMap<string, RouteDefaultValue>;
-// TODO: this should be serializable
-export type RouteData = { readonly [key: string]: string  | undefined | null } | ReadonlyMap<string | symbol, unknown>;
+// TODO: this needs to be serializable
+export type RouteData = { readonly [key: string]: string | undefined | null } | ReadonlyMap<string | symbol, unknown>;
 
 export function normalizeRouteParams(params: RouteParams): Map<string, string> {
 	if (params instanceof Map) {

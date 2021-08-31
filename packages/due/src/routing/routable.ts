@@ -15,3 +15,7 @@ export abstract class Routable extends Composable {
 export class NoopRoutable extends Routable {
 
 }
+
+export function NoopRoutableProvider() {
+	return NoopRoutable;
+}

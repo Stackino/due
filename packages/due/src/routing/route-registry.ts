@@ -1,4 +1,4 @@
-import { Tag, Injectable, ServiceProviderTag } from '../ioc';
+import { Tag } from '../ioc';
 import { buildRoute, Route } from './route';
 import { RootRouteDeclaration, RouteDeclaration } from './route-declaration';
 

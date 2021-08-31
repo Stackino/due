@@ -49,27 +49,27 @@ export class TransitionController extends Injectable implements Transition {
 	}
 
 	private async createEnteringState(route: Route): Promise<State> {
-		let Page: Newable<Routable>;
-		if (route.declaration.page) {
-			const pageOrModule = await executeProvider(route.declaration.page);
+		let Routable: Newable<Routable>;
+		if (route.declaration.routable) {
+			const routableOrModule = await executeProvider(route.declaration.routable);
 
-			if (typeof pageOrModule === 'object' && pageOrModule !== null) {
-				Page = pageOrModule.default;
+			if (typeof routableOrModule === 'object' && routableOrModule !== null) {
+				Routable = routableOrModule.default;
 			} else {
-				Page = pageOrModule;
+				Routable = routableOrModule;
 			}
 		} else {
-			Page = NoopRoutable;
+			Routable = NoopRoutable;
 		}
 
 		return new State(
 			route, 
 			(_self, parent, setInstance, setServiceProvider) => {
 				const serviceProvider = (parent?.serviceProvider ?? this.serviceProvider).createScope({
-					configure: (services: ServiceCollection) => (Page as unknown as typeof Routable).configureServices(services),
+					configure: (services: ServiceCollection) => (Routable as unknown as typeof Routable).configureServices(services),
 				});
 		
-				const instance = serviceProvider.createFromClass(Page);
+				const instance = serviceProvider.createFromClass(Routable);
 
 				setServiceProvider(serviceProvider);
 				setInstance(instance);

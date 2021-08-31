@@ -43,22 +43,22 @@ function installJsxRoute(element: JSX.Element, builder: RouteBuilder) {
 	const name = element.props?.name ?? null;
 	const path = element.props?.path ?? null;
 	const defaults = element.props?.defaults ?? null;
-	const page = element.props?.page ?? null;
+	const routable = element.props?.routable ?? element.props?.page ?? null;
 
 	const children = element.props?.children;
 
 	if (isRoute(children)) {
-		builder.layout({ name, path, defaults, page }, builder => {
+		builder.layout({ name, path, defaults, routable }, builder => {
 			installJsxRoute(children, builder);
 		});
 	} else if (isRouteCollection(children)) {
-		builder.layout({ name, path, defaults, page }, builder => {
+		builder.layout({ name, path, defaults, routable }, builder => {
 			for (const child of children) {
 				installJsxRoute(child, builder);
 			}
 		});
 	} else {
-		builder.page({ name, path, defaults, page });
+		builder.page({ name, path, defaults, routable });
 	}
 }
 

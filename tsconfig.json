@@ -8,6 +8,7 @@
         "removeComments": false,
         "downlevelIteration": true,
         "importHelpers": true,
+        "esModuleInterop": true,
         "module": "commonjs",
         "moduleResolution": "node",
         "lib": [ "dom", "es2018" ],

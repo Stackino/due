@@ -195,6 +195,10 @@ export class Router5RouterHandler extends Injectable implements RouterHandler {
 	}
 }
 
+function isEmptyIntermediate(route: Route) {
+	return route.path === '/' && route.children.length > 0;
+}
+
 export class Router5RouterHandlerFactory extends Injectable implements RouterHandlerFactory {
 	private serviceProvider = this.$dependency(ServiceProviderTag);
 	private routeRegistry = this.$dependency(RouteRegistryTag);
@@ -208,11 +212,15 @@ export class Router5RouterHandlerFactory extends Injectable implements RouterHan
 		
 		for (const route of this.routeRegistry.root.descendants) {
 			const name = route.name;
-			let path = route.path;
-
-			if (!name || !path) {
+			if (!name) {
 				// nameless + pathless route callbacks are handled within `route-registry`
 				// nameless / pathless routes are handled within child routes
+				continue;
+			}
+
+			let path = route.path;
+			if (isEmptyIntermediate(route)) {
+				// skip intermediate segments having
 				continue;
 			}
 
@@ -220,15 +228,14 @@ export class Router5RouterHandlerFactory extends Injectable implements RouterHan
 			let parent = route.parent;
 			while (parent) {
 				if (parent.name) {
-					//name = `${parent.declaration.name}.${name}`;
-					if (!parent.path) {
+					if (isEmptyIntermediate(parent)) {
 						alias = `${parent.declaration.name}___${alias}`;
 					} else {
 						alias = `${parent.declaration.name}.${alias}`;
 					}
 				}
 
-				if (!parent.name && parent.path) {
+				if (!parent.name && !isEmptyIntermediate(parent)) {
 					path = pathCombine('/', parent.path, path);
 				}
 

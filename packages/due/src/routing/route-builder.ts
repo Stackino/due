@@ -20,7 +20,7 @@ export interface LayoutProps<TPage extends Routable = Routable> {
     defaults?: RouteDefaults | null;
     routable?: RoutableProvider<TPage> | null;
 
-    children: JSX.Element;
+    children: JSX.Element | JSX.Element[];
 }
 
 export const Layout = function <TPage extends Routable = Routable>(props: LayoutProps<TPage>) {

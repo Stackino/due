@@ -22,27 +22,27 @@
     "classnames": "^2.3.1",
     "path-parser": "^6.1.0",
     "tslib": "^2.3.1",
-    "ua-parser-js": "^0.7.28"
+    "ua-parser-js": "^1.0.2"
   },
   "peerDependencies": {
     "mobx": "^6.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.1",
-    "@types/node": "^16.7.8",
+    "@types/jest": "^27.4.1",
+    "@types/node": "^17.0.23",
     "@types/ua-parser-js": "^0.7.36",
     "@types/webpack": "^5.28.0",
-    "@types/webpack-env": "^1.16.2",
-    "@typescript-eslint/eslint-plugin": "^4.30.0",
-    "@typescript-eslint/parser": "^4.30.0",
-    "eslint": "^7.32.0",
-    "eslint-webpack-plugin": "^3.0.1",
-    "jest": "^27.1.0",
-    "ts-jest": "^27.0.5",
-    "ts-loader": "^9.2.5",
-    "ts-node": "^10.2.1",
-    "typescript": "^4.4.2",
-    "webpack": "^5.51.1",
-    "webpack-cli": "^4.8.0"
+    "@types/webpack-env": "^1.16.3",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "eslint": "^8.12.0",
+    "eslint-webpack-plugin": "^3.1.1",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.4",
+    "ts-loader": "^9.2.8",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.3",
+    "webpack": "^5.71.0",
+    "webpack-cli": "^4.9.2"
   }
 }

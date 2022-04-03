@@ -1,6 +1,6 @@
 {
   "name": "@stackino/due-preset-react",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "main": "dist/index.js",
   "repository": "https://github.com/Stackino/Due",
   "author": "Lukáš Novotný",

@@ -116,7 +116,7 @@ View.displayName = 'View';
 export const ReactRenderServiceOptionsTag = new Tag<ReactRenderServiceOptions>('Stackino react render service options');
 
 export interface ReactRenderServiceOptions {
-	output: HTMLElement | ((html: string) => void);
+	render: (app: React.ReactNode) => void;
 }
 
 export class ReactRenderService extends Injectable implements RenderService {
@@ -126,15 +126,9 @@ export class ReactRenderService extends Injectable implements RenderService {
 
 	private portalRoots: Map<Portal<unknown, unknown>, HTMLDivElement> = new Map();
 
-	private domServer: typeof import('react-dom/server') | null = null;
-
 	private rootPageContext: PageContext | null = null;
 
 	async start(): Promise<void> {
-		if (typeof this.options.output === 'function') {
-			this.domServer = await import('react-dom/server');
-		}
-
 		return Promise.resolve();
 	}
 
@@ -173,13 +167,7 @@ export class ReactRenderService extends Injectable implements RenderService {
 			{portalElements}
 		</>;
 
-		if (typeof this.options.output === 'function') {
-			const html = this.domServer!.renderToString(appElement);
-
-			this.options.output(html);
-		} else {
-			ReactDOM.render(appElement, this.options.output);
-		}
+		this.options.render(appElement);
 	}
 
 	stop(): Promise<void> {

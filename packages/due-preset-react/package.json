@@ -13,17 +13,18 @@
     "test": "jest",
     "watch:dev": "webpack --mode development --watch",
     "watch:prod": "webpack --mode production --watch",
+    "publish-now": "yarn publish --no-git-tag-version --access=public --non-interactive",
     "publish-patch": "yarn publish --patch --no-git-tag-version --access=public",
     "publish-minor": "yarn publish --minor --no-git-tag-version --access=public",
     "publish-major": "yarn publish --major --no-git-tag-version --access=public",
     "prepublishOnly": "yarn run build:prod"
   },
   "dependencies": {
-    "@stackino/due": "0.4.x",
-    "@stackino/due-plugin-odachirpcclient": "0.4.x",
-    "@stackino/due-plugin-progress": "0.4.x",
-    "@stackino/due-plugin-react": "0.4.x",
-    "@stackino/due-plugin-router5": "0.4.x",
+    "@stackino/due": "0.5.x",
+    "@stackino/due-plugin-odachirpcclient": "0.5.x",
+    "@stackino/due-plugin-progress": "0.5.x",
+    "@stackino/due-plugin-react": "0.5.x",
+    "@stackino/due-plugin-router5": "0.5.x",
     "tslib": "^2.3.1"
   },
   "peerDependencies": {

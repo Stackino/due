@@ -78,9 +78,11 @@ function createPortalElements(serviceProvider: ServiceProvider, roots: Map<Porta
 			serviceProvider: serviceProvider,
 		};
 
-		result.push(ReactDOM.createPortal(<RenderContextContext.Provider value={nextPortalContext}>
+		const reactPortal: React.ReactPortal = ReactDOM.createPortal(<RenderContextContext.Provider value={nextPortalContext}>
 			<ObservedComponent />
-		</RenderContextContext.Provider>, el, el.id));
+		</RenderContextContext.Provider>, el, el.id);
+
+		result.push(reactPortal);
 	}
 
 	return result;

@@ -18,6 +18,8 @@ export interface LinkProps {
 	style?: React.CSSProperties;
 	className?: string;
 	activeClassName?: string;
+
+	children?: React.ReactNode;
 }
 
 export const Link: React.FunctionComponent<LinkProps> = observer(function ({ variant = 'a', to, params, data, activeName, activeParams, id, style, className, activeClassName = 'active', children }) {

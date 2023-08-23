@@ -75,12 +75,12 @@ export class TransitionController extends Injectable implements Transition {
 				setInstance(instance);
 			},
 			async (self, setCommitAction) => {
-				let enteringCommit: void | (() => void);
+				let enteringCommit: void | (() => void) = void 0;
 				if (self.instance.onEntering) {
 					enteringCommit = await self.instance.onEntering(this);
 				}
 
-				let enteringOrRetainingCommit: void | (() => void);
+				let enteringOrRetainingCommit: void | (() => void) = void 0;
 				if (self.instance.onEnteringOrRetaining) {
 					enteringOrRetainingCommit = await self.instance.onEnteringOrRetaining(this);
 				}
@@ -109,12 +109,12 @@ export class TransitionController extends Injectable implements Transition {
 				setServiceProvider(state.serviceProvider);
 			}, 
 			async (self, setCommitAction) => {
-				let retainingCommit: void | (() => void);
+				let retainingCommit: void | (() => void) = void 0;
 				if (self.instance.onRetaining) {
 					retainingCommit = await self.instance.onRetaining(this);
 				}
 
-				let enteringOrRetainingCommit: void | (() => void);
+				let enteringOrRetainingCommit: void | (() => void) = void 0;
 				if (self.instance.onEnteringOrRetaining) {
 					enteringOrRetainingCommit = await self.instance.onEnteringOrRetaining(this);
 				}
